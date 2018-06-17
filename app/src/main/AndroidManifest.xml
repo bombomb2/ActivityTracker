@@ -27,6 +27,11 @@
             android:name=".IndoorService"
             android:enabled="true"
             android:exported="true"></service>
+        <service
+            android:name=".HSMonitor"></service>
+        <service
+            android:name=".StepCount"></service>
+
     </application>
 
 </manifest>

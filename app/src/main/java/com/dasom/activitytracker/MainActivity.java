@@ -20,24 +20,53 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
+    private static final String BROADCAST_ACTION_ACTIVITY = "kr.ac.koreatech.msp.hslocationtracking";
     LocationManager locManager;
     ProximityReceiver receiver_proximity;
     boolean isPermitted = false;
     final int MY_PERMISSIONS_REQUEST = 1;
     Location_out[] location = new Location_out[2];
-    TextView tv_content;
+    TextView tv_content,movingText,step;
     WifiManager wifiManager;
     BroadcastReceiver receiver_text;
     TextFileManager textFileManager;
+    int total_steps;
+    private int steps;
+    StepMonitor moving_check;
+    Intent step_count;
+    private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
 
+            if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
+                steps = intent.getIntExtra("steps", 0);
+                total_steps +=steps;
+               step.setText("steps: " + total_steps);
+            }
+            else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
+                boolean moving = intent.getBooleanExtra("moving", false);
+                if(moving) {
+                    movingText.setText("Moving");
+                    startService(step_count);
+                } else {
+                    movingText.setText("NOT Moving");
+                    stopService(step_count);
+                }
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        step_count = new Intent(this , StepCount.class);
         requestRuntimePermission();
-
+        moving_check =  new StepMonitor(getApplicationContext());
         tv_content = (TextView)findViewById(R.id.tv_content);
+        movingText = (TextView)findViewById(R.id.isMoving);
+        step =  (TextView)findViewById(R.id.step);
         Button btn_remove = (Button)findViewById(R.id.btn_remove);
         btn_remove.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,7 +75,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 tv_content.setText(textFileManager.load());
             }
         });
-
+        IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
+        intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
+        registerReceiver(MyStepReceiver, intentFilter);
         textFileManager = new TextFileManager();
 
         locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);

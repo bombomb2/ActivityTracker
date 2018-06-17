@@ -13,6 +13,32 @@
         android:layout_height="wrap_content"
         android:text="로그 삭제" />
 
+    <EditText
+        android:id="@+id/editText_rms"
+        android:layout_width="193dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="rms값입력" />
+
+    <TextView
+        android:id="@+id/isMoving"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/step"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
     <TextView
         android:id="@+id/tv_content"
         android:layout_width="match_parent"
