@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             wifiManager.setWifiEnabled(true);
         Intent intent = new Intent(getApplicationContext(), IndoorService.class);
         startService(intent);
+        Intent hs = new Intent(this,HSMonitor.class);
+        startService(hs);
     }
 
     private void requestRuntimePermission() {
@@ -164,7 +166,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
     private void proximityStart() {
-        location[0] = new Location_out("운동장", 36.762581, 127.284527, 80);
+       // location[0] = new Location_out("운동장", 36.762581, 127.284527, 80);
+        location[0] = new Location_out("ㅊㅂㄱ", 36.760973, 127.280727, 80);
         location[1] = new Location_out("대학본부 앞", 36.764215, 127.282173, 50);
         for(int i=0; i<=1; i++) {
             addProximity(i);
