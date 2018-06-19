@@ -66,7 +66,7 @@ public class IndoorService extends Service {
                 // 진동 패턴
                 long[] pattern = {0, 200};
                 // pattern 변수로 지정된 방식으로 진동한다, -1: 반복 없음. 한번의 진동 패턴 수행 후 완료
-                     vib.vibrate(pattern, -1);
+                     //vib.vibrate(pattern, -1);
                 textFileManager.save(getTime()+" "+ location[i].getlocationName()+"\n");
                 sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
                 Toast.makeText(this, location[i].getlocationName(), Toast.LENGTH_SHORT).show();

@@ -10,6 +10,8 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class StepCount extends Service implements SensorEventListener {
     private static final String LOGTAG = "StepMonitor";
 
@@ -23,9 +25,9 @@ public class StepCount extends Service implements SensorEventListener {
     private float last_speed;
     private int count;
     private float x, y, z;
+    ArrayList<Double> speed1 = new ArrayList<>();
 
-
-    private static final double step_standard = 1.3;
+    private static final double step_standard = 1.5;
 
 
     @Override
@@ -36,11 +38,11 @@ public class StepCount extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         Log.d(LOGTAG, "onCreate()");
-
+        lastTime = System.currentTimeMillis();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLinear = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         // SensorEventListener 등록
-        mSensorManager.registerListener(this, mLinear, 1000);
+        mSensorManager.registerListener(this, mLinear, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -71,10 +73,32 @@ public class StepCount extends Service implements SensorEventListener {
     // 센서 데이터가 업데이트 되면 호출
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-
+            count = 0;
             long currentTime = System.currentTimeMillis();//현재시간 저장
-            long gabOfTime = (currentTime - lastTime);//측정 전의 시간과 현재시간의 차
-
+            long gabOfTime = (currentTime - lastTime) ;//측정 전의 시간과 현재시간의 차
+            x = event.values[0];
+            y = event.values[1];
+            z = event.values[2];
+            double rms = Math.sqrt(x * x + y * y + z * z);
+            speed1.add(rms);
+            if(gabOfTime >= 1000)
+            {
+                lastTime = currentTime;
+                double sum = 0;
+                for(int i=0; i<speed1.size(); i++)
+                    sum+=speed1.get(i);
+                double avr = sum / speed1.size();
+                speed1.clear();
+                //Log.d("test_sample", "time:" + avr);
+                if(avr > step_standard) {
+                    Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
+                    count++;
+                   // count  = count/2;
+                    intent.putExtra("steps", count);
+                    sendBroadcast(intent);
+                }
+            }
+            /*
             if (gabOfTime > 1000) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로                L
                 lastTime = currentTime;//지나간 현재 시간 저장
 
@@ -82,25 +106,37 @@ public class StepCount extends Service implements SensorEventListener {
                 y = event.values[1] ;
                 z = event.values[2] ;
 
-                speed = Math.abs(x+y+z - lastX - lastY - lastZ);//대략의 거리값을 측정 하기위한 변수
-                Log.d("test_sample","limit"+Math.abs(last_speed-speed)+"");
+                speed = Math.abs(x*x+);//대략의 거리값을 측정 하기위한 변수
+                speed1.add(speed);
               ///  Log.d("test","step:"+speed/gabOfTime*1000);
-                if (speed/gabOfTime*1000>step_standard && Math.abs(last_speed-speed) >= 2.0) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
-                    Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
-                     count++;
-                    intent.putExtra("steps",count);
-                    sendBroadcast(intent);
-                } // end of if
+                if(speed1.size() == 5) {
+                    float temp = 0;
+                    for(int i=0; i<5;i++)
+                    {
+                        temp+=speed1.get(i);
+                    }
+                    temp = temp/5;
+                    speed1.clear();
+                    Log.d("test_sample","limit\t"+temp+"");
+                    if (temp> step_standard) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
+                        Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
+                        count++;
+                        intent.putExtra("steps", count);
+                        sendBroadcast(intent);
+
+                    } // end of if
+                    //
+                }
 
             } // end of if
             lastX = event.values[0];
             lastY = event.values[1];
             lastZ = event.values[2];
-            last_speed = speed;
+            //last_speed = speed;
+        }*/
         }
+
     }
-
-
     // a simple inference for step count
 
 
