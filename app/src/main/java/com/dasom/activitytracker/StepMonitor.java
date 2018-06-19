@@ -23,6 +23,7 @@ public class StepMonitor implements SensorEventListener {
     private float speed;
     private float x, y, z;
     private long lastTime;
+    private float last_speed;
     public static long[] time = new long[2];
     // 움직임 여부를 나타내는 bool 변수: true이면 움직임, false이면 안 움직임
     private boolean isMoving;
@@ -88,8 +89,7 @@ public class StepMonitor implements SensorEventListener {
         long currentTime = System.currentTimeMillis();//현재시간 저장
         long gabOfTime = (currentTime - lastTime);//측정 전의 시간과 현재시간의 차
 
-        if (gabOfTime > 500) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로
-            Log.i("onSensorChanged_IF", "FIRST_IF_IN");
+        if (gabOfTime > 1000) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로
             lastTime = currentTime;//지나간 현재 시간 저장
         }
             x = values[0];
@@ -99,15 +99,10 @@ public class StepMonitor implements SensorEventListener {
             speed = Math.abs(x + y + z - lastX - lastY - lastZ);//대략의 거리값을 측정 하기위한 변수
 
 
-            if ((speed /gabOfTime*1000)> step_THRESHOLD) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
+            if ((speed /gabOfTime*1000)> step_THRESHOLD && Math.abs(last_speed-speed) >= 2.0) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
                 movementCount++;
                 time[0] = System.currentTimeMillis();
-
             }// end of if
-        else
-            {
-                time[1] = System.currentTimeMillis();
-            }
             Log.d("test",time[0]-time[1]+"");
 
         // end of if
@@ -116,7 +111,7 @@ public class StepMonitor implements SensorEventListener {
         lastX = values[0];
         lastY = values[1];
         lastZ = values[2];
-
+        last_speed = speed;
         /*double rms = Math.sqrt(values[0] * values[0] + values[1] * values[1] + values[2] * values[2]);
         //Log.d(LOGTAG, "rms: " + rms);
 
@@ -131,26 +126,24 @@ public class StepMonitor implements SensorEventListener {
     public boolean isMoving() {
         if(sensingCount == 0) {
             isMoving = false;
+            time[1] = System.currentTimeMillis();
             return isMoving;
         }
 
         double ratio = (double)movementCount / (double)sensingCount;
-        if(Math.abs(time[0]-time[1])>=500) {
+        if(Math.abs(time[0]-time[1])<=5000) {
             isMoving = true;
-            //time[0] = System.currentTimeMillis();
         } else {
             isMoving = false;
-            //time[1] = System.currentTimeMillis();
-
+            time[1] = System.currentTimeMillis();
         }
         return isMoving;
     }
 
     public long gaptime()
     {
-        if(isMoving)
-            return (time[1]-time[0]);
-        else
-            return (time[0] - time[1]);
+
+            return Math.abs(time[1]-time[0]);
+
     }
 }

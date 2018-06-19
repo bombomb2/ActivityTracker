@@ -20,9 +20,10 @@ public class StepCount extends Service implements SensorEventListener {
     private float lastZ;
     private long lastTime;
     private float speed;
+    private float last_speed;
     private int count;
     private float x, y, z;
-
+    int temp_count =0 ;
 
     private static final double step_standard = 1.3;
 
@@ -39,7 +40,7 @@ public class StepCount extends Service implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLinear = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         // SensorEventListener 등록
-        mSensorManager.registerListener(this, mLinear, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mLinear, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -70,10 +71,10 @@ public class StepCount extends Service implements SensorEventListener {
     // 센서 데이터가 업데이트 되면 호출
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-
+            int count2=0;
             long currentTime = System.currentTimeMillis();//현재시간 저장
             long gabOfTime = (currentTime - lastTime);//측정 전의 시간과 현재시간의 차
-
+                count2++;
             if (gabOfTime > 1000) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로                L
                 lastTime = currentTime;//지나간 현재 시간 저장
 
@@ -82,12 +83,13 @@ public class StepCount extends Service implements SensorEventListener {
                 z = event.values[2] ;
 
                 speed = Math.abs(x+y+z - lastX - lastY - lastZ);//대략의 거리값을 측정 하기위한 변수
-
-                Log.d("test","step:"+speed/gabOfTime*1000);
-                if (speed/gabOfTime*1000>step_standard) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
+                Log.d("test_sample","speed"+speed+"");
+              ///  Log.d("test","step:"+speed/gabOfTime*1000);
+                if (speed/gabOfTime*1000>step_standard && (int)last_speed/speed != 0 ) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
                     Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
-                     count++;
-                    intent.putExtra("steps",count);
+                     temp_count =  count++;
+                     temp_count = temp_count/count2;
+                    intent.putExtra("steps",temp_count);
                     sendBroadcast(intent);
                 } // end of if
 
@@ -95,6 +97,7 @@ public class StepCount extends Service implements SensorEventListener {
             lastX = event.values[0];
             lastY = event.values[1];
             lastZ = event.values[2];
+            last_speed = speed;
         }
     }
 

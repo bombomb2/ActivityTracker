@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 int temp_total_steps = 0;
                 temp_total_steps += steps;
                 Log.d("test",moving_check.gaptime()+"");
-                if(moving_check.gaptime() > 5000) {
+                if(moving_check.gaptime() <= 5000) {
                     total_steps += temp_total_steps;
                     total_steps += steps;
                 }
