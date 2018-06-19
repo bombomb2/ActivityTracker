@@ -30,12 +30,14 @@
     <TextView
         android:id="@+id/isMoving"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="not moving" />
 
     <TextView
         android:id="@+id/step"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="steps:0" />
 
     <TextView
         android:id="@+id/tv_content"

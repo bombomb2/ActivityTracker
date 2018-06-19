@@ -1,6 +1,8 @@
 package com.dasom.activitytracker;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -40,7 +43,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
                 steps = intent.getIntExtra("steps", 0);
-                total_steps +=steps;
+                int temp_total_steps = 0;
+                temp_total_steps += steps;
+                Log.d("test",moving_check.gaptime()+"");
+                if(moving_check.gaptime() > 5000) {
+                    total_steps += temp_total_steps;
+                    total_steps += steps;
+                }
                step.setText("steps: " + total_steps);
             }
             else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
@@ -48,9 +57,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 if(moving) {
                     movingText.setText("Moving");
                     startService(step_count);
+
+                    //startService(step_count);
                 } else {
                     movingText.setText("NOT Moving");
                     stopService(step_count);
+                    //stopService(step_count);
                 }
 
             }
@@ -250,4 +262,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onProviderDisabled(String provider) {
 
     }
+
 }

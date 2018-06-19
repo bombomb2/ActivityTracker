@@ -33,7 +33,7 @@ public class HSMonitor extends Service {
     private CountDownTimer timer;
 
     private StepMonitor accelMonitor;
-    private long period = 10000;
+    private long period = 5000;
     private static final long activeTime = 1000;
     private static final long periodForMoving = 5000;
     private static final long periodIncrement = 5000;
@@ -215,7 +215,7 @@ public class HSMonitor extends Service {
         Intent in = new Intent("kr.ac.koreatech.msp.hsalarm");
         pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, in, 0);
         am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + period - activeTime, pendingIntent);
+                SystemClock.elapsedRealtime() + period , pendingIntent);
     }
 
     private void sendDataToActivity(boolean moving) {
