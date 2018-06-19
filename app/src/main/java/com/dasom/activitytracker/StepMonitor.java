@@ -9,6 +9,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 
 public class StepMonitor implements SensorEventListener {
     private static final String LOGTAG = "HS_Location_Tracking";
@@ -24,6 +26,7 @@ public class StepMonitor implements SensorEventListener {
     private long lastTime;
     private float last_speed;
     public static long[] time = new long[2];
+    ArrayList<Double> speed1 = new ArrayList<>();
     // 움직임 여부를 나타내는 bool 변수: true이면 움직임, false이면 안 움직임
     private boolean isMoving;
 
@@ -88,6 +91,35 @@ public class StepMonitor implements SensorEventListener {
         long currentTime = System.currentTimeMillis();//현재시간 저장
         long gabOfTime = (currentTime - lastTime);//측정 전의 시간과 현재시간의 차
 
+
+        x = values[0];
+        y = values[1];
+        z =values[2];
+        double rms = Math.sqrt(x * x + y * y + z * z);
+        speed1.add(rms);
+        if(gabOfTime>=1000)
+        {
+            lastTime = currentTime;
+            double sum = 0;
+            for(int i=0; i<speed1.size(); i++)
+                sum+=speed1.get(i);
+            double avr = sum / speed1.size();
+            speed1.clear();
+            if(avr >1.5) {
+                Log.d("test_sample","start");
+                //time[0] = System.currentTimeMillis();//움직이기 시작한 시간
+                isMoving = true;
+                Log.d("test_sample", "time:" + (time[0]-time[1]));
+            }
+            else {
+                Log.d("test_sample","stop");
+                time[1] = System.currentTimeMillis();//움직이지 않았다고 판단되는 시간
+                isMoving = false;
+                 
+                Log.d("test_sample", "time:" + (time[1]-time[0]));
+            }
+        }
+        /*
         if (gabOfTime > 1000) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로
             lastTime = currentTime;//지나간 현재 시간 저장
         }
@@ -98,13 +130,11 @@ public class StepMonitor implements SensorEventListener {
             speed = Math.abs(x + y + z - lastX - lastY - lastZ);//대략의 거리값을 측정 하기위한 변수
 
 
-            if ((speed /gabOfTime*1000)> step_THRESHOLD && Math.abs(last_speed-speed) >= 2.0) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
+            if ((speed /gabOfTime*1000)> step_THRESHOLD ) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
                 movementCount++;
                 time[0] = System.currentTimeMillis();
             }// end of if
-        else{
-                time[1] = System.currentTimeMillis();
-            }
+
             Log.d("test",time[0]-time[1]+"");
 
         // end of if
@@ -121,29 +151,21 @@ public class StepMonitor implements SensorEventListener {
         if(rms > 1.1) {
             movementCount++;
         }
-*/
+            */
     }
 
     // 일정 시간 동안 움직임 판단 횟수가 센서 업데이트 횟수의 50%를 넘으면 움직임으로 판단
     public boolean isMoving() {
-        if(sensingCount == 0) {
-            isMoving = false;
-            return isMoving;
-        }
-
-        double ratio = (double)movementCount / (double)sensingCount;
-        if(Math.abs(time[0]-time[1])<=5000) {
+        /*if((time[0]-time[1])<=3000) {
             isMoving = true;
-        } else {
+        } else if((time[1]-time[0])>=5000) {
             isMoving = false;
-        }
+        }*/
         return isMoving;
     }
 
     public long gaptime()
     {
-
             return Math.abs(time[1]-time[0]);
-
     }
 }

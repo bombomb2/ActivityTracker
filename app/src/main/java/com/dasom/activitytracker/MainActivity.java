@@ -33,14 +33,14 @@ public class MainActivity extends AppCompatActivity {
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
                 steps = intent.getIntExtra("steps", 0);
                 int temp_total_steps = 0;
-                temp_total_steps += steps;
+                temp_total_steps += steps/2;
                 Log.d("test",moving_check.gaptime()+"");
-                if(moving_check.gaptime() <= 5000) {
+
                     total_steps += temp_total_steps;
                     total_steps += steps;
-                }
+
                step.setText("steps: " + total_steps);
-                Log.d("test_sample", total_steps+"");
+                //Log.d("test_sample", total_steps+"");
             }
             else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
                 boolean moving = intent.getBooleanExtra("moving", false);
