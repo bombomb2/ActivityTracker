@@ -20,6 +20,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -53,6 +54,10 @@ public class HSMonitor extends Service {
     ProximityReceiver receiver_proximity;
     WifiManager wifiManager;
     Location_out[] location = new Location_out[2];
+
+    private long startMoveTime = 0 ;
+    private long endMoveTime = 0;
+
     // Alarm 시간이 되었을 때 안드로이드 시스템이 전송해주는 broadcast를 받을 receiver 정의
     // 움직임 여부에 따라 다음 alarm이 발생하도록 설정한다.
     private BroadcastReceiver AlarmReceiver = new BroadcastReceiver() {
@@ -87,6 +92,17 @@ public class HSMonitor extends Service {
                         boolean moving = accelMonitor.isMoving();
                         // 움직임 여부에 따라 GPS location update 요청 처리
                         if(moving) {
+                            startMoveTime = getTime();
+                            Log.d("시간", "이동시작시간: "+ startMoveTime);
+
+                                    // 화면에 정보 표시를 위해 activity의 broadcast receiver가 받을 수 있도록 broadcast 전송
+                                    Intent intent = new Intent(BROADCAST_ACTION_ACTIVITY);
+                                    intent.putExtra("moving", moving);
+                                    intent.putExtra("time", startMoveTime);
+                                    // broadcast 전송
+                                    sendBroadcast(intent);
+                                    endMoveTime = 0;
+
                             Log.d(LOGTAG, "before calling requestLocation");
                             if(!isRequestRegistered) {
                                 requestLocation();
@@ -116,6 +132,15 @@ public class HSMonitor extends Service {
 
 
                         } else {
+                            endMoveTime = getTime();
+                            Log.d("시간", "이동정지시간: "+ endMoveTime);
+
+                                    Intent intent = new Intent(BROADCAST_ACTION_ACTIVITY);
+                                    intent.putExtra("moving", moving);
+                                    intent.putExtra("time" , endMoveTime);
+                                    // broadcast 전송
+                                    sendBroadcast(intent);
+
                             Log.d(LOGTAG, "before calling cancelLocationRequest");
                             if(isRequestRegistered) {
                                 cancelLocationRequest();
@@ -145,7 +170,6 @@ public class HSMonitor extends Service {
                         setNextAlarm(moving);
 
                         // 화면에 위치 데이터를 표시할 수 있도록 브로드캐스트 전송
-                        sendDataToActivity(moving);
 
                         // When you finish your job, RELEASE the wakelock
                         wakeLock.release();
@@ -265,16 +289,6 @@ public class HSMonitor extends Service {
                 SystemClock.elapsedRealtime() + period , pendingIntent);
     }
 
-    private void sendDataToActivity(boolean moving) {
-        // 화면에 정보 표시를 위해 activity의 broadcast receiver가 받을 수 있도록 broadcast 전송
-        Intent intent = new Intent(BROADCAST_ACTION_ACTIVITY);
-        intent.putExtra("moving", moving);
-        intent.putExtra("longitude", lon);
-        intent.putExtra("latitude", lat);
-        // broadcast 전송
-        sendBroadcast(intent);
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -380,5 +394,25 @@ public class HSMonitor extends Service {
 
         }
 
+    }
+
+    private long getTime(){ //현재 날짜와 시간을 반환해줌
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        String time = sdf.format(new Date(System.currentTimeMillis()));
+        try {
+            date = sdf.parse(time);
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date.getTime();
+    }
+
+    private long getGap(long startTime, long endTime) {
+        long gap = (startTime - endTime) /1000; //초 단위
+        long minute_gap = gap / 60;
+
+        return gap;
     }
 }

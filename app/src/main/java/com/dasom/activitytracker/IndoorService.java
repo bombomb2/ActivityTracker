@@ -146,7 +146,7 @@ public class IndoorService extends Service {
 
     private String getTime(){ //현재 날짜와 시간을 반환해줌
         Date date = new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
         String time = sdf.format(date);
 
         return time;

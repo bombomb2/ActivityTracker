@@ -51,6 +51,17 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
+            else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
+                long gap = intent.getLongExtra("gap", 0);
+                boolean stay = intent.getBooleanExtra("stay", true);
+
+                if(gap> 0) {
+                    if(stay)
+                        textFileManager.save(gap + "초 체류\n");
+                    else
+                        textFileManager.save(gap + "초 이동\n");
+                }
+            }
         }
     };
 
@@ -74,10 +85,12 @@ public class MainActivity extends AppCompatActivity {
         });
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
+        intentFilter.addAction("com.dasom.activitytracker.time");
         registerReceiver(MyStepReceiver, intentFilter);
         textFileManager = new TextFileManager();
         Intent hs = new Intent(this,HSMonitor.class);
         startService(hs);
+        startService(new Intent(this, TimeMonitor.class));
     }
 
     private void requestRuntimePermission() {
