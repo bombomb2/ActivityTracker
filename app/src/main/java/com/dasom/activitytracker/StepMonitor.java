@@ -115,7 +115,7 @@ public class StepMonitor implements SensorEventListener {
                 Log.d("test_sample","stop");
                 time[1] = System.currentTimeMillis();//움직이지 않았다고 판단되는 시간
                 isMoving = false;
-                 
+
                 Log.d("test_sample", "time:" + (time[1]-time[0]));
             }
         }
