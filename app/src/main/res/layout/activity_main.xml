@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/btn_remove"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="로그 삭제" />
+
+    <EditText
+        android:id="@+id/editText_rms"
+        android:layout_width="193dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="rms값입력" />
+
+    <TextView
+        android:id="@+id/isMoving"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="not moving" />
+
+    <TextView
+        android:id="@+id/step"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="steps:0" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</LinearLayout>
