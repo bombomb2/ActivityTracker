@@ -2,7 +2,10 @@ package com.dasom.activitytracker;
 
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -37,8 +40,12 @@ public class StepMonitor implements SensorEventListener {
     private int movementCount;
 
     // 움직임 여부를 판단하기 위한 3축 가속도 데이터의 RMS 값의 기준 문턱값
-    private static final double step_THRESHOLD = 1.1;
-
+    private static double step_THRESHOLD = 1.1;
+   public void setRms(double rms)
+   {
+       step_THRESHOLD = rms;
+   }
+   public double getRms(){return step_THRESHOLD;}
     public StepMonitor(Context context) {
         this.context = context;
 
@@ -90,7 +97,7 @@ public class StepMonitor implements SensorEventListener {
     private void detectMovement(float[] values) {
         long currentTime = System.currentTimeMillis();//현재시간 저장
         long gabOfTime = (currentTime - lastTime);//측정 전의 시간과 현재시간의 차
-
+        Log.d("test_sample3",step_THRESHOLD+"");
 
         x = values[0];
         y = values[1];
@@ -105,7 +112,7 @@ public class StepMonitor implements SensorEventListener {
                 sum+=speed1.get(i);
             double avr = sum / speed1.size();
             speed1.clear();
-            if(avr >1.5) {
+            if(avr >step_THRESHOLD) {
                 Log.d("test_sample","start");
                 //time[0] = System.currentTimeMillis();//움직이기 시작한 시간
                 isMoving = true;

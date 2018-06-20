@@ -109,28 +109,7 @@ public class HSMonitor extends Service {
                                 Log.d(LOGTAG, "after calling requestLocation");
                             }
 
-                            startService(new Intent(getApplicationContext() , StepCount.class));
-
-                            try {
-                                locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
-                            } catch (SecurityException e) {
-                                e.printStackTrace();
-                            }
-
-                            if(receiver_proximity == null) {
-                                IntentFilter filter = new IntentFilter();
-                                filter.addAction("com.dasom.activitytracker.proximity0");
-                                filter.addAction("com.dasom.activitytracker.proximity1");
-                                registerReceiver(receiver_proximity, filter);
-                                for (int i = 0; i <= 1; i++) {
-                                    addProximity(i);
-                                }
-                            }
-                            if(wifiManager.isWifiEnabled() == false)
-                                wifiManager.setWifiEnabled(true);
-                            startService(new Intent(getApplicationContext(), IndoorService.class));
-
-
+                         stopProximity();
                         } else {
                             endMoveTime = getTime();
                             Log.d("시간", "이동정지시간: "+ endMoveTime);
@@ -147,24 +126,8 @@ public class HSMonitor extends Service {
                                 Log.d(LOGTAG, "after calling cancelLocationRequest");
                             }
 
+                            startProximity();
                             stopService(new Intent(getApplicationContext() , StepCount.class));
-
-                            try {
-                                locManager.removeUpdates(mlocListener);
-                            } catch (SecurityException e) {
-                                e.printStackTrace();
-                            }
-
-                            try {
-                                if (receiver_proximity != null) {
-                                    unregisterReceiver(receiver_proximity);
-                                    receiver_proximity = null;
-                                }
-                            }
-                            catch (IllegalArgumentException e){
-                                e.printStackTrace();
-                            }
-                            stopService(new Intent(getApplicationContext(), IndoorService.class));
                         }
                         // 움직임 여부에 따라 다음 alarm 설정
                         setNextAlarm(moving);
@@ -413,5 +376,50 @@ public class HSMonitor extends Service {
         long minute_gap = gap / 60;
 
         return gap;
+    }
+
+    private void startProximity() {
+        Intent intent = new Intent(getApplicationContext(),StepCount.class);
+        intent.putExtra("rms",accelMonitor.getRms());
+        startService(intent);
+
+        try {
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+
+        if(receiver_proximity == null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction("com.dasom.activitytracker.proximity0");
+            filter.addAction("com.dasom.activitytracker.proximity1");
+            registerReceiver(receiver_proximity, filter);
+            for (int i = 0; i <= 1; i++) {
+                addProximity(i);
+            }
+        }
+        if(wifiManager.isWifiEnabled() == false)
+            wifiManager.setWifiEnabled(true);
+        startService(new Intent(getApplicationContext(), IndoorService.class));
+    }
+
+    private void stopProximity() {
+
+        try {
+            locManager.removeUpdates(mlocListener);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (receiver_proximity != null) {
+                unregisterReceiver(receiver_proximity);
+                receiver_proximity = null;
+            }
+        }
+        catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }
+        stopService(new Intent(getApplicationContext(), IndoorService.class));
     }
 }

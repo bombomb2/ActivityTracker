@@ -97,7 +97,7 @@ public class IndoorService extends Service {
         Log.d("123","123");
 
         //각 위치의 ap정보를 객체로 생성
-        location[0] = new Location_in("401호 계단 앞", "64:e5:99:db:05:cc", -60, "18:80:90:c6:7b:20", -61, "18:80:90:c6:7b:22", -60);
+        location[0] = new Location_in("401호", "18:80:90:c6:7b:22", -51, "18:80:90:c6:7b:21", -50, "18:80:90:c6:7b:2d", -50);
         location[1] = new Location_in("다산홀", " 20:3a:07:9e:a6:c0", -66, "20:3a:07:9e:a6:c5", -62, "a4:18:75:58:77:d1", -58);
     }
 

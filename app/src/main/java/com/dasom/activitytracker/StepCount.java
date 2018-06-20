@@ -1,7 +1,9 @@
 package com.dasom.activitytracker;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,17 +29,27 @@ public class StepCount extends Service implements SensorEventListener {
     private float x, y, z;
     ArrayList<Double> speed1 = new ArrayList<>();
 
-    private static final double step_standard = 1.5;
+    private static final  double step_standard = 0.8;
 
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
+    private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("change_rms")) {
+               // step_standard = intent.getDoubleExtra("rms",0);
+            }
+        }
+    };
     @Override
     public void onCreate() {
+        //IntentFilter intentFilter = new IntentFilter("change_rms");
+       // registerReceiver(MyStepReceiver, intentFilter);
         Log.d(LOGTAG, "onCreate()");
+
         lastTime = System.currentTimeMillis();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLinear = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -53,8 +65,8 @@ public class StepCount extends Service implements SensorEventListener {
 
         Toast.makeText(this, "Activity Monitor 시작", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onStartCommand()");
-
-
+        //step_standard = intent.getDoubleExtra("rms",0.0);
+        Log.d("test_sample2", "time:" + step_standard);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -74,6 +86,7 @@ public class StepCount extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
             count = 0;
+            Log.d("test_sample2", "time:" + step_standard);
             long currentTime = System.currentTimeMillis();//현재시간 저장
             long gabOfTime = (currentTime - lastTime) ;//측정 전의 시간과 현재시간의 차
             x = event.values[0];
@@ -89,7 +102,6 @@ public class StepCount extends Service implements SensorEventListener {
                     sum+=speed1.get(i);
                 double avr = sum / speed1.size();
                 speed1.clear();
-                //Log.d("test_sample", "time:" + avr);
                 if(avr > step_standard) {
                     Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
                     count++;

@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     TextFileManager textFileManager;
     int total_steps;
     private int steps;
+    EditText edit_rms;
+    Button btn_rms;
     StepMonitor moving_check;
     Intent step_count;
     private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
@@ -35,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
                 int temp_total_steps = 0;
                 temp_total_steps += steps/2;
                 Log.d("test",moving_check.gaptime()+"");
-
                     total_steps += temp_total_steps;
                     total_steps += steps;
+
 
                step.setText("steps: " + total_steps);
                 //Log.d("test_sample", total_steps+"");
@@ -75,12 +78,27 @@ public class MainActivity extends AppCompatActivity {
         tv_content = (TextView)findViewById(R.id.tv_content);
         movingText = (TextView)findViewById(R.id.isMoving);
         step =  (TextView)findViewById(R.id.step);
+        edit_rms = (EditText)findViewById(R.id.editText_rms);
+        btn_rms = (Button)findViewById(R.id.button_rms);
         Button btn_remove = (Button)findViewById(R.id.btn_remove);
         btn_remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 textFileManager.delete();
                 tv_content.setText(textFileManager.load());
+            }
+        });
+        btn_rms.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v)
+            {
+                //Intent intent = new Intent("change_rms");
+                //double temp = Double.parseDouble(edit_rms.getText().toString());
+                //intent.putExtra("rms",temp);
+               // sendBroadcast(intent);
+                double temp = Double.parseDouble(edit_rms.getText().toString());
+                edit_rms.setText("");
+                moving_check.setRms(temp);
             }
         });
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
