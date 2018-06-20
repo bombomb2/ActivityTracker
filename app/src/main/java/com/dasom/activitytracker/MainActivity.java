@@ -43,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
-                steps = intent.getIntExtra("steps", 0);
-                temp_steps = intent.getIntExtra("steps2",0);
+                steps = intent.getIntExtra("steps", 0)/2;
                 now_steps += steps ;
 
             }
@@ -56,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
             else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
                 boolean moving = intent.getBooleanExtra("moving", false);
                 if(moving) {
-                    //temp_total_steps = moving_check.getCount();
                     movingText.setText("Moving");
                 } else {
                     movingText.setText("NOT Moving");
