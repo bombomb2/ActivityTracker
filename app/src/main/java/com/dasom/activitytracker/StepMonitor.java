@@ -8,7 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,11 +57,12 @@ public class StepMonitor implements SensorEventListener {
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(this);
         }
-
-        Descending descending = new Descending();
-        Collections.sort(arr_rms,descending);
-        arr_rms.remove(0);
-        arr_rms.remove(arr_rms.size()-1);
+        if(arr_rms.size()>3) {
+            Descending descending = new Descending();
+            Collections.sort(arr_rms, descending);
+            arr_rms.remove(0);
+            arr_rms.remove(arr_rms.size() - 1);
+        }
         double sum = 0;
         for(int i=0; i<arr_rms.size(); i++)
             sum+=arr_rms.get(i);

@@ -111,7 +111,6 @@ public class HSMonitor extends Service {
                                     sendBroadcast(intent);
 
                             startProximity();
-                            stopService(new Intent(getApplicationContext() , StepCount.class));
                         }
                         // 움직임 여부에 따라 다음 alarm 설정
                         setNextAlarm(moving);

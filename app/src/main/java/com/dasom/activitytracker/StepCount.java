@@ -1,16 +1,12 @@
 package com.dasom.activitytracker;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,10 +70,12 @@ public class StepCount extends Service implements SensorEventListener {
             if(gabOfTime >= 1000)
             {
                 lastTime = currentTime;
-                Descending descending = new Descending();
-                Collections.sort(arr_rms,descending);
-                arr_rms.remove(0);
-                arr_rms.remove(arr_rms.size()-1);
+                if(arr_rms.size()>3) {
+                    Descending descending = new Descending();
+                    Collections.sort(arr_rms, descending);
+                    arr_rms.remove(0);
+                    arr_rms.remove(arr_rms.size() - 1);
+                }
                 double sum = 0;
                 for(int i=0; i<arr_rms.size(); i++)
                     sum+=arr_rms.get(i);
