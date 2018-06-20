@@ -9,7 +9,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -65,7 +64,6 @@ public class StepCount extends Service implements SensorEventListener {
         // startId: start 요청을 나타내는 unique integer id
         count2 = sm.getCount();
         step_standard = sm.getRms();
-        Toast.makeText(this, "Activity Monitor 시작", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onStartCommand()");
         //step_standard = intent.getDoubleExtra("rms",0.0);
         Log.d("test_sample2", "time:" + step_standard);
@@ -73,7 +71,6 @@ public class StepCount extends Service implements SensorEventListener {
     }
 
     public void onDestroy() {
-        Toast.makeText(this, "Activity Monitor 중지", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onDestroy()");
         // SensorEventListener 해제
         mSensorManager.unregisterListener(this);

@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     Button btn_rms;
     StepMonitor moving_check;
     Intent step_count;
+    private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private ArrayList<StatItem> items = new ArrayList<>();
     int temp_steps;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                         now_steps = 0;
                     }
                     adapter.notifyDataSetChanged();
+                    recyclerView.scrollToPosition(adapter.getItemCount()-1);
                 }
             }
             else if(intent.getAction().equals("com.dasom.activitytracker.location")) {
@@ -241,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setRecyclerView() {
-        RecyclerView recyclerView;
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         adapter = new RecyclerAdapter(items);

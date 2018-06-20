@@ -1,6 +1,7 @@
 package com.dasom.activitytracker;
 
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -40,15 +41,7 @@ public class HSMonitor extends Service {
     private static final long periodIncrement = 5000;
     private static final long periodMax = 30000;
 
-    private LocationManager mLocationManager = null;
-    private final int MIN_TIME_UPDATES = 5000; // milliseconds
-    private final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 5; // meters
-    private boolean isRequestRegistered = false;
-
-    private double lon = 0.0;
-    private double lat = 0.0;
-
-    private locListener mlocListener;
+    private gpsListener mgpsListener;
     private LocationManager locManager;
     WifiManager wifiManager;
 
@@ -181,7 +174,7 @@ public class HSMonitor extends Service {
         wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        mlocListener = new locListener();
+        mgpsListener = new gpsListener();
 
         // AlarmManager 객체 얻기
         am = (AlarmManager)getSystemService(ALARM_SERVICE);
@@ -227,15 +220,18 @@ public class HSMonitor extends Service {
         }
     }
 
-
-    private class locListener implements LocationListener {
+    private class gpsListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
-            if(!isInside){
-                Location loc_now = new Location("현재위치");
-                loc_now.setLatitude(location.getLatitude());
-                loc_now.setLongitude(location.getLongitude());
+            Location loc_now = new Location("현재위치");
+            loc_now.setLatitude(location.getLatitude());
+            loc_now.setLongitude(location.getLongitude());
 
+            Log.d("gps", "위도: "+loc_now.getLatitude());
+            Log.d("gps","경도: "+loc_now.getLongitude());
+            Log.d("gps","정확도: "+      loc_now.getAccuracy());
+
+            if(loc_now.hasAccuracy()) {
                 Location loc_field = new Location("운동장");
                 loc_field.setLatitude(36.762581);
                 loc_field.setLongitude(127.284527);
@@ -265,19 +261,15 @@ public class HSMonitor extends Service {
                     sendBroadcast(intent2);
                 }
             }
-        }
+
+            else {
+                startService(new Intent(getApplicationContext(), IndoorService.class));
+            }
+
+            }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-            if(status == 2){ //GPS 상태 좋음
-            isInside = false;
-                stopService(new Intent(getApplicationContext(), IndoorService.class));
-            }
-
-            else if(status == 1 || status == 0) { //실내일 경우
-            isInside = true;
-                startService(new Intent(getApplicationContext(), IndoorService.class));
-            }
 
         }
 
@@ -290,8 +282,8 @@ public class HSMonitor extends Service {
         public void onProviderDisabled(String provider) {
 
         }
-
     }
+
 
     private long getTime(){ //현재 날짜와 시간을 반환해줌
         Date date = new Date();
@@ -306,16 +298,9 @@ public class HSMonitor extends Service {
         return date.getTime();
     }
 
-    private long getGap(long startTime, long endTime) {
-        long gap = (startTime - endTime) /1000; //초 단위
-        long minute_gap = gap / 60;
-
-        return gap;
-    }
-
     private void startProximity() {
         try {
-            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mgpsListener);
         } catch (SecurityException e) {
             e.printStackTrace();
         }
@@ -327,9 +312,24 @@ public class HSMonitor extends Service {
     private void stopProximity() {
 
         try {
-            locManager.removeUpdates(mlocListener);
+            locManager.removeUpdates(mgpsListener);
         } catch (SecurityException e) {
             e.printStackTrace();
         }
+        if(isServiceRunning())
+        stopService(new Intent(getApplicationContext(), IndoorService.class));
     }
+
+    public boolean isServiceRunning()
+    {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if (IndoorService.class.getName().equals(service.service.getClassName()))
+                return true;
+        }
+        return false;
+    }
+
 }

@@ -33,13 +33,15 @@
         android:id="@+id/isMoving"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="not moving" />
+        android:text="not moving"
+        android:textColor="@android:color/holo_red_dark" />
 
     <TextView
         android:id="@+id/step"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="steps:0" />
+        android:text="steps:0"
+        android:textColor="@android:color/holo_red_light" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
