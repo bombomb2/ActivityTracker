@@ -29,7 +29,7 @@ public class TimeMonitor extends Service {
                 if(!first) {
                     if (now_moving ^ prev_moving) {
                         now_time = time;
-                        long gap = (now_time - prev_time) / 1000;
+                        long gap = (now_time - prev_time) / 1000/  60;
                         Intent intent2 = new Intent("com.dasom.activitytracker.time");
                         intent2.putExtra("gap", gap);
                         if(now_moving) {
