@@ -31,7 +31,7 @@ public class StepCount extends Service implements SensorEventListener {
     StepMonitor sm;
     ArrayList<Double> speed1 = new ArrayList<>();
 
-    private static final  double step_standard = 1.0;
+    private static double step_standard = 1.0;
 
 
     @Override
@@ -65,6 +65,7 @@ public class StepCount extends Service implements SensorEventListener {
         // flags: service start 요청에 대한 부가 정보. 0, START_FLAG_REDELIVERY, START_FLAG_RETRY
         // startId: start 요청을 나타내는 unique integer id
         count2 = sm.getCount();
+        step_standard = sm.getRms();
         Toast.makeText(this, "Activity Monitor 시작", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onStartCommand()");
         //step_standard = intent.getDoubleExtra("rms",0.0);
@@ -110,46 +111,9 @@ public class StepCount extends Service implements SensorEventListener {
                     sendBroadcast(intent);
                 }
             }
-            /*
-            if (gabOfTime > 1000) { //  gap of time of step count //측정 시간을 500밀리초로 간격으로                L
-                lastTime = currentTime;//지나간 현재 시간 저장
 
-                x = event.values[0] ;
-                y = event.values[1] ;
-                z = event.values[2] ;
-
-                speed = Math.abs(x*x+);//대략의 거리값을 측정 하기위한 변수
-                speed1.add(speed);
-              ///  Log.d("test","step:"+speed/gabOfTime*1000);
-                if(speed1.size() == 5) {
-                    float temp = 0;
-                    for(int i=0; i<5;i++)
-                    {
-                        temp+=speed1.get(i);
-                    }
-                    temp = temp/5;
-                    speed1.clear();
-                    Log.d("test_sample","limit\t"+temp+"");
-                    if (temp> step_standard) {//거리값을 측정하여 1.1이상이면 움직였다고 판단
-                        Intent intent = new Intent("kr.ac.koreatech.msp.stepmonitor"); //값을 브로드캐스트함
-                        count++;
-                        intent.putExtra("steps", count);
-                        sendBroadcast(intent);
-
-                    } // end of if
-                    //
-                }
-
-            } // end of if
-            lastX = event.values[0];
-            lastY = event.values[1];
-            lastZ = event.values[2];
-            //last_speed = speed;
-        }*/
         }
-
     }
-    // a simple inference for step count
 
 
 }
