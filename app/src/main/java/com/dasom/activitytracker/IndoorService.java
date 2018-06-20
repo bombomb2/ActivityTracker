@@ -10,7 +10,6 @@ import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,12 +68,16 @@ public class IndoorService extends Service {
                      //vib.vibrate(pattern, -1);
                 textFileManager.save(getTime()+" "+ location[i].getlocationName()+"\n");
                 sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
-                Toast.makeText(this, location[i].getlocationName(), Toast.LENGTH_SHORT).show();
+
+                Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                intent2.putExtra("location", location[i].getlocationName());
+                sendBroadcast(intent2);
             }
         }
         if(!isProximate) { // 등록한 위치가 아닌경우
-            textFileManager.save(getTime() + " unknown\n");
-            sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
+            Intent intent2 = new Intent("com.dasom.activitytracker.location");
+            intent2.putExtra("location", "실내");
+            sendBroadcast(intent2);
         }
     }
 
@@ -92,8 +95,6 @@ public class IndoorService extends Service {
 
         IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(mReceiver, filter);
-        textFileManager.save("모니터링 시작 - "+ getTime()+"\n");
-        sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
         Log.d("123","123");
 
         //각 위치의 ap정보를 객체로 생성
@@ -115,8 +116,6 @@ public class IndoorService extends Service {
     public void onDestroy() {
         stopTimerTask();
         unregisterReceiver(mReceiver);
-        textFileManager.save("모니터링 종료 - "+ getTime()+"\n");
-        sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
     }
 
     private void startTimerTask() {

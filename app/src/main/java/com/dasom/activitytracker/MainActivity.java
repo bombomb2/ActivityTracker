@@ -12,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     int temp_steps;
     int now_steps;
     private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
+        String location = "";
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
                     String endTime = sdf.format(nowTime);
                     String startTime = sdf.format(prevTime);
                     if(stay) {
-                        textFileManager.save(gap + "초 체류\n");
-                        items.add(new StatItem(startTime, endTime, gap + "초 정지", "temp", stay));
+                        textFileManager.save(gap + "초 정지\n");
+                        items.add(new StatItem(startTime, endTime, gap + "초 정지", location, stay));
                     }
                     else {
                         textFileManager.save(gap + "초 이동\n");
@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                     adapter.notifyDataSetChanged();
                 }
+            }
+            else if(intent.getAction().equals("com.dasom.activitytracker.location")) {
+                location = intent.getStringExtra("location");
             }
         }
     };
@@ -130,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
         intentFilter.addAction("com.dasom.activitytracker.time");
+        intentFilter.addAction("com.dasom.activitytracker.location");
         intentFilter.addAction("uncheck_step");
         registerReceiver(MyStepReceiver, intentFilter);
         textFileManager = new TextFileManager();

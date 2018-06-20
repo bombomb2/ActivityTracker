@@ -18,7 +18,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,12 +50,11 @@ public class HSMonitor extends Service {
 
     private locListener mlocListener;
     private LocationManager locManager;
-    ProximityReceiver receiver_proximity;
     WifiManager wifiManager;
-    Location_out[] location = new Location_out[2];
 
     private long startMoveTime = 0 ;
     private long endMoveTime = 0;
+    private boolean isInside = false;
 
     // Alarm 시간이 되었을 때 안드로이드 시스템이 전송해주는 broadcast를 받을 receiver 정의
     // 움직임 여부에 따라 다음 alarm이 발생하도록 설정한다.
@@ -107,12 +105,6 @@ public class HSMonitor extends Service {
                                     sendBroadcast(intent);
                                     endMoveTime = 0;
 
-                            Log.d(LOGTAG, "before calling requestLocation");
-                            if(!isRequestRegistered) {
-                                requestLocation();
-                                Log.d(LOGTAG, "after calling requestLocation");
-                            }
-
                          stopProximity();
                         } else {
                             stopService(new Intent(getApplicationContext(),StepCount.class));
@@ -124,12 +116,6 @@ public class HSMonitor extends Service {
                                     intent.putExtra("time" , endMoveTime);
                                     // broadcast 전송
                                     sendBroadcast(intent);
-
-                            Log.d(LOGTAG, "before calling cancelLocationRequest");
-                            if(isRequestRegistered) {
-                                cancelLocationRequest();
-                                Log.d(LOGTAG, "after calling cancelLocationRequest");
-                            }
 
                             startProximity();
                             stopService(new Intent(getApplicationContext() , StepCount.class));
@@ -146,84 +132,6 @@ public class HSMonitor extends Service {
                 };
                 timer.start();
             }
-        }
-    };
-
-    private void requestLocation() {
-        try {
-            if(mLocationManager == null) {
-                Log.d(LOGTAG, "mLocMan obtained");
-                mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-            }
-            if(!isRequestRegistered) {
-                // min time과 min distance를 0으로 설정했을 때와 아닌 경우 비교
-
-                /*
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        MIN_TIME_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                        locationListener);
-                */
-                /*
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        0,
-                        0,
-                        locationListener);
-                */
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        3000,
-                        0,
-                        locationListener);
-
-                isRequestRegistered = true;
-            }
-        } catch (SecurityException se) {
-            se.printStackTrace();
-            Log.e(LOGTAG, "PERMISSION_NOT_GRANTED");
-        }
-    }
-
-    private void cancelLocationRequest() {
-        Log.d(LOGTAG, "Cancel the location update request");
-        if(mLocationManager != null) {
-            try {
-                mLocationManager.removeUpdates(locationListener);
-            } catch(SecurityException se) {
-                se.printStackTrace();
-                Log.e(LOGTAG, "PERMISSION_NOT_GRANTED");
-            }
-        }
-        mLocationManager = null;
-        isRequestRegistered = false;
-    }
-
-    LocationListener locationListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            Log.d(LOGTAG, " Time : " + getCurrentTime() + " Longitude : " + location.getLongitude()
-                    + " Latitude : " + location.getLatitude() + " Altitude: " + location.getAltitude()
-                    + " Accuracy : " + location.getAccuracy());
-            lon = location.getLongitude();
-            lat = location.getLatitude();
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle bundle) {
-            Log.d(LOGTAG, "GPS status changed. status code: " + status);
-            if(status == 2)
-                Log.d(LOGTAG, "status: Available");
-            else if(status == 1)
-                Log.d(LOGTAG, "status: Temporarily unavailable");
-            else if(status == 0)
-                Log.d(LOGTAG, "status: Out of service");
-            Toast.makeText(getApplicationContext(), "GPS status changed.", Toast.LENGTH_SHORT).show();
-        }
-
-        public void onProviderEnabled(String provider) {
-            Log.d(LOGTAG, "GPS onProviderEnabled: " + provider);
-        }
-
-        public void onProviderDisabled(String provider) {
-            Log.d(LOGTAG, "GPS onProviderDisabled: " + provider);
-            Toast.makeText(getApplicationContext(), "GPS is off, please turn on!", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -270,10 +178,9 @@ public class HSMonitor extends Service {
         // Alarm 발생 시 전송되는 broadcast를 수신할 receiver 등록
         IntentFilter intentFilter = new IntentFilter("kr.ac.koreatech.msp.hsalarm");
         registerReceiver(AlarmReceiver, intentFilter);
-        proximityStart();
-        receiver_proximity = new ProximityReceiver();
         wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
         mlocListener = new locListener();
 
         // AlarmManager 객체 얻기
@@ -287,7 +194,6 @@ public class HSMonitor extends Service {
         // startId: start 요청을 나타내는 unique integer id
 
         Log.d(LOGTAG, "onStartCommand");
-        Toast.makeText(this, "Activity Monitor 시작", Toast.LENGTH_SHORT).show();
 
         // Alarm이 발생할 시간이 되었을 때, 안드로이드 시스템에 전송을 요청할 broadcast를 지정
         Intent in = new Intent("kr.ac.koreatech.msp.hsalarm");
@@ -302,7 +208,6 @@ public class HSMonitor extends Service {
     }
 
     public void onDestroy() {
-        Toast.makeText(this, "Activity Monitor 중지", Toast.LENGTH_SHORT).show();
 
         try {
             // Alarm 발생 시 전송되는 broadcast 수신 receiver를 해제
@@ -322,32 +227,57 @@ public class HSMonitor extends Service {
         }
     }
 
-    private void proximityStart() {
-        location[0] = new Location_out("운동장", 36.762581, 127.284527, 80);
-        location[1] = new Location_out("대학본부 앞", 36.764215, 127.282173, 50);
-    }
-
-    private void addProximity(int count) {
-            Intent intent = new Intent("com.dasom.activitytracker.proximity"+count); //브로드캐스트를 위한 인텐트 생성
-            intent.putExtra("name", location[count].getName()); //현재 객체의 이름정보를 전달하여 Toast메세지에 정보를 표시할 수 있도록 함
-            PendingIntent proximity = PendingIntent.getBroadcast(this, 0, intent, 0);
-
-            try{
-                locManager.addProximityAlert(location[count].getLatitude(), location[count].getLongitude(), location[count].getRadius(), -1, proximity); //proximityAlert 등록
-            }
-            catch (SecurityException e) {
-                e.printStackTrace();
-            }
-    }
 
     private class locListener implements LocationListener {
         @Override
         public void onLocationChanged(Location location) {
+            if(!isInside){
+                Location loc_now = new Location("현재위치");
+                loc_now.setLatitude(location.getLatitude());
+                loc_now.setLongitude(location.getLongitude());
 
+                Location loc_field = new Location("운동장");
+                loc_field.setLatitude(36.762581);
+                loc_field.setLongitude(127.284527);
+
+                Location loc_head = new Location("대학본부 앞");
+                loc_head.setLatitude(36.764215); //50
+                loc_head.setLongitude(127.282173);
+
+                float distance_field = loc_now.distanceTo(loc_field);
+                float distance_head = loc_now.distanceTo(loc_head);
+
+                if(distance_field <= 80) {
+                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                    intent2.putExtra("location", "운동장");
+                    sendBroadcast(intent2);
+                }
+
+                else if(distance_head <= 50) {
+                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                    intent2.putExtra("location", "대학본부 앞");
+                    sendBroadcast(intent2);
+                }
+
+                else {
+                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                    intent2.putExtra("location", "실외");
+                    sendBroadcast(intent2);
+                }
+            }
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
+            if(status == 2){ //GPS 상태 좋음
+            isInside = false;
+                stopService(new Intent(getApplicationContext(), IndoorService.class));
+            }
+
+            else if(status == 1 || status == 0) { //실내일 경우
+            isInside = true;
+                startService(new Intent(getApplicationContext(), IndoorService.class));
+            }
 
         }
 
@@ -390,18 +320,8 @@ public class HSMonitor extends Service {
             e.printStackTrace();
         }
 
-        if(receiver_proximity == null) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction("com.dasom.activitytracker.proximity0");
-            filter.addAction("com.dasom.activitytracker.proximity1");
-            registerReceiver(receiver_proximity, filter);
-            for (int i = 0; i <= 1; i++) {
-                addProximity(i);
-            }
-        }
         if(wifiManager.isWifiEnabled() == false)
             wifiManager.setWifiEnabled(true);
-        startService(new Intent(getApplicationContext(), IndoorService.class));
     }
 
     private void stopProximity() {
@@ -409,16 +329,6 @@ public class HSMonitor extends Service {
         try {
             locManager.removeUpdates(mlocListener);
         } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            if (receiver_proximity != null) {
-                unregisterReceiver(receiver_proximity);
-                receiver_proximity = null;
-            }
-        }
-        catch (IllegalArgumentException e){
             e.printStackTrace();
         }
     }
