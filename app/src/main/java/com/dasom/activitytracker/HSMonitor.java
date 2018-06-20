@@ -225,37 +225,41 @@ public class HSMonitor extends Service {
             Location loc_now = new Location("현재위치");
             loc_now.setLatitude(location.getLatitude());
             loc_now.setLongitude(location.getLongitude());
+            loc_now.setAccuracy(location.getAccuracy());
+            Log.d("gps", "위도: "+ loc_now.getLatitude());
+            Log.d("gps", "경도: "+ loc_now.getLongitude());
+            Log.d("gps", "정확도: "+ loc_now.getAccuracy());
 
-            if(loc_now.hasAccuracy()) {
-                Location loc_field = new Location("운동장");
-                loc_field.setLatitude(36.762581);
-                loc_field.setLongitude(127.284527);
+                if (loc_now.getAccuracy() <= 13) {
+                    Location loc_field = new Location("운동장");
+                    loc_field.setLatitude(36.762581);
+                    loc_field.setLongitude(127.284527);
 
-                Location loc_head = new Location("대학본부 앞");
-                loc_head.setLatitude(36.764215); //50
-                loc_head.setLongitude(127.282173);
+                    Location loc_head = new Location("대학본부 앞");
+                    loc_head.setLatitude(36.764215); //50
+                    loc_head.setLongitude(127.282173);
 
-                float distance_field = loc_now.distanceTo(loc_field);
-                float distance_head = loc_now.distanceTo(loc_head);
+                    float distance_field = loc_now.distanceTo(loc_field);
+                    float distance_head = loc_now.distanceTo(loc_head);
 
-                if(distance_field <= 80) {
-                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
-                    intent2.putExtra("location", "운동장");
-                    sendBroadcast(intent2);
+                    if (distance_field <= 80) {
+                        Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                        intent2.putExtra("location", "운동장");
+                        sendBroadcast(intent2);
+                    } else if (distance_head <= 50) {
+                        Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                        intent2.putExtra("location", "대학본부 앞");
+                        sendBroadcast(intent2);
+                    } else {
+                        Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                        intent2.putExtra("location", "실외");
+                        sendBroadcast(intent2);
+                    }
                 }
-
-                else if(distance_head <= 50) {
-                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
-                    intent2.putExtra("location", "대학본부 앞");
-                    sendBroadcast(intent2);
-                }
-
                 else {
-                    Intent intent2 = new Intent("com.dasom.activitytracker.location");
-                    intent2.putExtra("location", "실외");
-                    sendBroadcast(intent2);
+                    startService(new Intent(getApplicationContext(), IndoorService.class));
                 }
-            }
+
             }
 
         @Override
