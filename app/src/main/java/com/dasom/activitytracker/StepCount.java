@@ -26,10 +26,12 @@ public class StepCount extends Service implements SensorEventListener {
     private float speed;
     private float last_speed;
     private int count;
+    int count2;
     private float x, y, z;
+    StepMonitor sm;
     ArrayList<Double> speed1 = new ArrayList<>();
 
-    private static final  double step_standard = 0.8;
+    private static final  double step_standard = 1.0;
 
 
     @Override
@@ -49,7 +51,7 @@ public class StepCount extends Service implements SensorEventListener {
         //IntentFilter intentFilter = new IntentFilter("change_rms");
        // registerReceiver(MyStepReceiver, intentFilter);
         Log.d(LOGTAG, "onCreate()");
-
+        sm  = new StepMonitor(getApplicationContext());
         lastTime = System.currentTimeMillis();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLinear = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -62,7 +64,7 @@ public class StepCount extends Service implements SensorEventListener {
         // intent: startService() 호출 시 넘기는 intent 객체
         // flags: service start 요청에 대한 부가 정보. 0, START_FLAG_REDELIVERY, START_FLAG_RETRY
         // startId: start 요청을 나타내는 unique integer id
-
+        count2 = sm.getCount();
         Toast.makeText(this, "Activity Monitor 시작", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onStartCommand()");
         //step_standard = intent.getDoubleExtra("rms",0.0);
@@ -73,7 +75,6 @@ public class StepCount extends Service implements SensorEventListener {
     public void onDestroy() {
         Toast.makeText(this, "Activity Monitor 중지", Toast.LENGTH_SHORT).show();
         Log.d(LOGTAG, "onDestroy()");
-
         // SensorEventListener 해제
         mSensorManager.unregisterListener(this);
     }
@@ -86,7 +87,6 @@ public class StepCount extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
             count = 0;
-            Log.d("test_sample2", "time:" + step_standard);
             long currentTime = System.currentTimeMillis();//현재시간 저장
             long gabOfTime = (currentTime - lastTime) ;//측정 전의 시간과 현재시간의 차
             x = event.values[0];
