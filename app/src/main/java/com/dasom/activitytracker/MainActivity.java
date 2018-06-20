@@ -13,9 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -25,13 +22,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String BROADCAST_ACTION_ACTIVITY = "kr.ac.koreatech.msp.hslocationtracking";
     boolean isPermitted = false;
     final int MY_PERMISSIONS_REQUEST = 1;
-    TextView tv_content,movingText,step;
-    BroadcastReceiver receiver_text;
+    TextView step;
     TextFileManager textFileManager;
     int total_steps;
     private int steps;
-    EditText edit_rms;
-    Button btn_rms;
     StepMonitor moving_check;
     Intent step_count;
     private RecyclerView recyclerView;
@@ -55,36 +49,37 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("check_step","step1 "+temp_steps);
                 now_steps += temp_steps;
             }
-            else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
-                boolean moving = intent.getBooleanExtra("moving", false);
-                if(moving) {
-                    movingText.setText("Moving");
-                } else {
-                    movingText.setText("NOT Moving");
-                }
-            }
+
             else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
+                boolean isDelete = false;
                 long gap = intent.getLongExtra("gap", 0);
                 boolean stay = intent.getBooleanExtra("stay", true);
                 long nowTime = intent.getLongExtra("endTime", 0);
                 long prevTime = intent.getLongExtra("startTime", 0);
                 if(gap> 0) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                    if(location.equals("")){
+                        startService(new Intent(getApplicationContext(), IndoorService.class));
+                    }
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                     String endTime = sdf.format(nowTime);
                     String startTime = sdf.format(prevTime);
                     if(stay) {
-                        textFileManager.save(gap + "초 정지\n");
-                        items.add(new StatItem(startTime, endTime, gap + "초 정지", location, stay));
+                        if(gap>=5) {
+                            textFileManager.save(startTime+"-"+endTime+": "+location+ ", "+gap + "분 정지\n");
+                            items.add(new StatItem(startTime, endTime, gap, location, stay));
+                        }
                     }
                     else {
-                        textFileManager.save(gap + "초 이동\n");
-
-                        items.add(new StatItem(startTime, endTime, gap + "초 이동", now_steps+"걸음", stay));
-                        Log.d("check_step","step2 "+now_steps);
-                        total_steps += now_steps;
-                        step.setText("steps: " + total_steps);
-                        moving_check.setCount(0);
-                        now_steps = 0;
+                        location = "";
+                        if(gap>=1) {
+                            textFileManager.save(startTime+"-"+endTime+": "+now_steps+ "걸음, "+gap + "분 이동\n");
+                            items.add(new StatItem(startTime, endTime, gap, now_steps + "걸음", stay));
+                            Log.d("check_step", "step2 " + now_steps);
+                            total_steps += now_steps;
+                            step.setText("Steps: " + total_steps);
+                            moving_check.setCount(0);
+                            now_steps = 0;
+                        }
                     }
                     adapter.notifyDataSetChanged();
                     recyclerView.scrollToPosition(adapter.getItemCount()-1);
@@ -106,32 +101,7 @@ public class MainActivity extends AppCompatActivity {
         step_count = new Intent(this , StepCount.class);
         requestRuntimePermission();
         moving_check =  new StepMonitor(getApplicationContext());
-        tv_content = (TextView)findViewById(R.id.tv_content);
-        movingText = (TextView)findViewById(R.id.isMoving);
         step =  (TextView)findViewById(R.id.step);
-        edit_rms = (EditText)findViewById(R.id.editText_rms);
-        btn_rms = (Button)findViewById(R.id.button_rms);
-        Button btn_remove = (Button)findViewById(R.id.btn_remove);
-        btn_remove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                textFileManager.delete();
-                tv_content.setText(textFileManager.load());
-            }
-        });
-        btn_rms.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v)
-            {
-                //Intent intent = new Intent("change_rms");
-                //double temp = Double.parseDouble(edit_rms.getText().toString());
-                //intent.putExtra("rms",temp);
-               // sendBroadcast(intent);
-                double temp = Double.parseDouble(edit_rms.getText().toString());
-                edit_rms.setText("");
-                moving_check.setRms(temp);
-            }
-        });
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
         intentFilter.addAction("com.dasom.activitytracker.time");
@@ -142,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         Intent hs = new Intent(this,HSMonitor.class);
         startService(hs);
         startService(new Intent(this, TimeMonitor.class));
+        startService(new Intent(getApplicationContext(), IndoorService.class));
     }
 
     private void requestRuntimePermission() {
@@ -217,31 +188,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        tv_content.setText(textFileManager.load());
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.dasom.activitytracker.WRITE_FILE");
-
-        receiver_text = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                tv_content.setText(textFileManager.load()); //브로드캐스트가 발생하면 텍스트 파일을 불러와서 TextView에 출력
-            }
-        };
-
-        registerReceiver(receiver_text, intentFilter);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-         unregisterReceiver(receiver_text);
-    }
-
     private void setRecyclerView() {
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
@@ -249,4 +195,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
+
+
 }

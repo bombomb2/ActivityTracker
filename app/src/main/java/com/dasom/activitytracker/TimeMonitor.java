@@ -33,13 +33,13 @@ public class TimeMonitor extends Service {
                         Intent intent2 = new Intent("com.dasom.activitytracker.time");
                         intent2.putExtra("gap", gap);
                         if(now_moving) {
-                            Log.d("지금", gap+"초 체류");
+                            Log.d("지금", gap+"분 체류");
                             intent2.putExtra("stay", true);
                             intent2.putExtra("startTime", prev_time);
                             intent2.putExtra("endTime", now_time);
                         }
                         else {
-                            Log.d("지금", gap+"초 이동");
+                            Log.d("지금", gap+"분 이동");
                             intent2.putExtra("stay", false);
                             intent2.putExtra("startTime", prev_time);
                             intent2.putExtra("endTime", now_time);

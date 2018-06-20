@@ -226,10 +226,6 @@ public class HSMonitor extends Service {
             loc_now.setLatitude(location.getLatitude());
             loc_now.setLongitude(location.getLongitude());
 
-            Log.d("gps", "위도: "+loc_now.getLatitude());
-            Log.d("gps","경도: "+loc_now.getLongitude());
-            Log.d("gps","정확도: "+      loc_now.getAccuracy());
-
             if(loc_now.hasAccuracy()) {
                 Location loc_field = new Location("운동장");
                 loc_field.setLatitude(36.762581);
@@ -260,11 +256,6 @@ public class HSMonitor extends Service {
                     sendBroadcast(intent2);
                 }
             }
-
-            else {
-                startService(new Intent(getApplicationContext(), IndoorService.class));
-            }
-
             }
 
         @Override

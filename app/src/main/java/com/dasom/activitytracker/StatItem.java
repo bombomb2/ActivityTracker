@@ -3,16 +3,24 @@ package com.dasom.activitytracker;
 public class StatItem {
     private String startTime;
     private String endTime;
-    private String stats;
+    private long stats;
     private String location;
     private boolean stay;
 
-    public StatItem(String startTime, String endTime, String stats, String location, boolean stay) {
+    public StatItem(String startTime, String endTime, long stats, String location, boolean stay) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.stats = stats;
         this.location = location;
         this.stay = stay;
+    }
+
+    public StatItem() {
+        this.startTime = "";
+        this.endTime = "";
+        this.stats = 0;
+        this.location = "";
+        this.stay = false;
     }
 
     public boolean isStay() {
@@ -39,11 +47,11 @@ public class StatItem {
         this.endTime = endTime;
     }
 
-    public String getStats() {
+    public long getStats() {
         return stats;
     }
 
-    public void setStats(String stats) {
+    public void setStats(long stats) {
         this.stats = stats;
     }
 

@@ -31,15 +31,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         holder.tv_startTime.setText(mItems.get(position).getStartTime());
         holder.tv_endTime.setText(mItems.get(position).getEndTime());
-        holder.tv_stats.setText(mItems.get(position).getStats());
+
         holder.tv_location.setText(mItems.get(position).getLocation());
         if (mItems.get(position).isStay()) { //체류
+            holder.tv_stats.setText(mItems.get(position).getStats()+"분 정지");
             holder.img_circle.setColorFilter(Color.parseColor("#ffc0cb"));
             holder.view.setBackgroundColor(Color.parseColor("#80ffffff"));
 
         }
         else {
-
+            holder.tv_stats.setText(mItems.get(position).getStats()+"분 이동");
             holder.img_circle.setColorFilter(Color.parseColor("#FFFCAB53"));
             holder.view.setBackgroundColor(Color.parseColor("#FF50D2C2"));
         }

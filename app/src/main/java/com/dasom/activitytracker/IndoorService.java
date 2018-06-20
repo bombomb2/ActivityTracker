@@ -20,7 +20,6 @@ import java.util.TimerTask;
 public class IndoorService extends Service {
 
     private static final String TAG = "IndoorService";
-    TextFileManager textFileManager;
     WifiManager wifiManager;
     List<ScanResult> scanList;
 
@@ -65,8 +64,7 @@ public class IndoorService extends Service {
                 // 진동 패턴
                 long[] pattern = {0, 200};
                 // pattern 변수로 지정된 방식으로 진동한다, -1: 반복 없음. 한번의 진동 패턴 수행 후 완료
-                     //vib.vibrate(pattern, -1);
-                textFileManager.save(getTime()+" "+ location[i].getlocationName()+"\n");
+                     vib.vibrate(pattern, -1);
                 sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
 
                 Intent intent2 = new Intent("com.dasom.activitytracker.location");
@@ -91,7 +89,6 @@ public class IndoorService extends Service {
         vib = (Vibrator)getSystemService(VIBRATOR_SERVICE);
         wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         location = new Location_in[2];
-        textFileManager = new TextFileManager();
 
         IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(mReceiver, filter);
@@ -129,7 +126,7 @@ public class IndoorService extends Service {
         };
 
         // TimerTask를 Timer를 통해 실행시킨다
-        timer.schedule(timerTask, 1000, 15000); // 1초 후에 타이머를 구동하고 60초마다 반복한다
+        timer.schedule(timerTask, 1000, 15000); // 1초 후에 타이머를 구동하고 15초마다 반복한다
         //*** Timer 클래스 메소드 이용법 참고 ***//
         // 	schedule(TimerTask task, long delay, long period)
         // http://developer.android.com/intl/ko/reference/java/util/Timer.html

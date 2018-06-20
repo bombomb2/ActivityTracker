@@ -10,52 +10,17 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btn_remove"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="로그 삭제" />
-
-    <EditText
-        android:id="@+id/editText_rms"
-        android:layout_width="193dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text" />
-
-    <Button
-        android:id="@+id/button_rms"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="rms값입력" />
-
-    <TextView
-        android:id="@+id/isMoving"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="not moving"
-        android:textColor="@android:color/holo_red_dark" />
-
     <TextView
         android:id="@+id/step"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="steps:0"
-        android:textColor="@android:color/holo_red_light" />
+        android:text="Steps: 0"
+        android:textColor="@android:color/holo_orange_light"
+        android:textSize="24sp" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/tv_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </LinearLayout>
