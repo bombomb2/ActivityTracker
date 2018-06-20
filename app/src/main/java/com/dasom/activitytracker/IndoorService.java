@@ -61,10 +61,6 @@ public class IndoorService extends Service {
         for (int i = 0; i < count; i++) {
             if (location[i].isProximate()) { // 등록한 위치에 있는경우
                 isProximate = true;
-                // 진동 패턴
-                long[] pattern = {0, 200};
-                // pattern 변수로 지정된 방식으로 진동한다, -1: 반복 없음. 한번의 진동 패턴 수행 후 완료
-                     vib.vibrate(pattern, -1);
                 sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
 
                 Intent intent2 = new Intent("com.dasom.activitytracker.location");
@@ -95,8 +91,7 @@ public class IndoorService extends Service {
         Log.d("123","123");
 
         //각 위치의 ap정보를 객체로 생성
-        //location[0] = new Location_in("401호", "18:80:90:c6:7b:22", -51, "18:80:90:c6:7b:21", -50, "18:80:90:c6:7b:2d", -50);
-        location[0] = new Location_in("401호", "64:e5:99:8e:4c:58", -49, "00:40:5a:e4:b2:fb", -52, "64:e5:99:8e:4c:58", -52); //실은 방
+        location[0] = new Location_in("401호", "18:80:90:c6:7b:22", -51, "18:80:90:c6:7b:21", -50, "18:80:90:c6:7b:2d", -50);
         location[1] = new Location_in("다산홀", " 20:3a:07:9e:a6:c0", -66, "20:3a:07:9e:a6:c5", -62, "a4:18:75:58:77:d1", -58);
         startTimerTask();
     }

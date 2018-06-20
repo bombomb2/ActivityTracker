@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String BROADCAST_ACTION_ACTIVITY = "kr.ac.koreatech.msp.hslocationtracking";
     boolean isPermitted = false;
     final int MY_PERMISSIONS_REQUEST = 1;
     TextView step;
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         requestRuntimePermission();
         moving_check =  new StepMonitor(getApplicationContext());
         step =  (TextView)findViewById(R.id.step);
-        IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
+        IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
         intentFilter.addAction("com.dasom.activitytracker.time");
         intentFilter.addAction("com.dasom.activitytracker.location");
@@ -117,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(MainActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
 
@@ -131,13 +128,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION )) {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MY_PERMISSIONS_REQUEST);
-            }
-
-            else if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION )) {
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -146,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST);
             }
         } else {

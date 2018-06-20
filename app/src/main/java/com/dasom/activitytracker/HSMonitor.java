@@ -230,7 +230,7 @@ public class HSMonitor extends Service {
             Log.d("gps", "경도: "+ loc_now.getLongitude());
             Log.d("gps", "정확도: "+ loc_now.getAccuracy());
 
-                if (loc_now.getAccuracy() <= 13) {
+                if (loc_now.getAccuracy() <= 6 && loc_now.getAccuracy() >= 2) {
                     Location loc_field = new Location("운동장");
                     loc_field.setLatitude(36.762581);
                     loc_field.setLongitude(127.284527);
