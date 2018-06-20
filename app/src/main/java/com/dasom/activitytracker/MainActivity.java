@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
             else if(intent.getAction().equals("uncheck_step"))
             {
                 temp_steps = intent.getIntExtra("uncheck_step",0)/2;
+                Log.d("check_step","step1 "+temp_steps);
                 now_steps += temp_steps;
             }
             else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
@@ -58,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
                     movingText.setText("Moving");
                 } else {
                     movingText.setText("NOT Moving");
-
                 }
             }
             else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                         textFileManager.save(gap + "초 이동\n");
 
                         items.add(new StatItem(startTime, endTime, gap + "초 이동", now_steps+"걸음", stay));
+                        Log.d("check_step","step2 "+now_steps);
                         total_steps += now_steps;
                         step.setText("steps: " + total_steps);
                         moving_check.setCount(0);

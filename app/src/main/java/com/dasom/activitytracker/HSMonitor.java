@@ -87,7 +87,7 @@ public class HSMonitor extends Service {
                     @Override
                     public void onFinish() {
                         Log.d(LOGTAG, "1-second accel data collected!!");
-                        // stop the accel data update
+
                         Intent step = new Intent("uncheck_step");
                         step.putExtra("uncheck_step",accelMonitor.getCount());
                         sendBroadcast(step);

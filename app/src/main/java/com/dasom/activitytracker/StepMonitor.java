@@ -34,7 +34,7 @@ public class StepMonitor implements SensorEventListener {
    }
    public double getRms(){return step_THRESHOLD;}
    public void setCount(int i){count = i;}
-   public int getCount(){return count;}
+   public int getCount(){return count/2;}
     public StepMonitor(Context context) {
         this.context = context;
 

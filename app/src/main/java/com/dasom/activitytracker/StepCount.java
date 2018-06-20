@@ -47,8 +47,6 @@ public class StepCount extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        count2 = sm.getCount();
         step_standard = sm.getRms();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -71,15 +69,15 @@ public class StepCount extends Service implements SensorEventListener {
             x = event.values[0];
             y = event.values[1];
             z = event.values[2];
-            Descending descending = new Descending();
-            Collections.sort(arr_rms,descending);
-            arr_rms.remove(0);
-            arr_rms.remove(arr_rms.size()-1);
             double rms = Math.sqrt(x * x + y * y + z * z);
             arr_rms.add(rms);
             if(gabOfTime >= 1000)
             {
                 lastTime = currentTime;
+                Descending descending = new Descending();
+                Collections.sort(arr_rms,descending);
+                arr_rms.remove(0);
+                arr_rms.remove(arr_rms.size()-1);
                 double sum = 0;
                 for(int i=0; i<arr_rms.size(); i++)
                     sum+=arr_rms.get(i);
