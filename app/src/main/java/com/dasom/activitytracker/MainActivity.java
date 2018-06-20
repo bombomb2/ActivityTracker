@@ -10,11 +10,16 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final String BROADCAST_ACTION_ACTIVITY = "kr.ac.koreatech.msp.hslocationtracking";
@@ -29,13 +34,16 @@ public class MainActivity extends AppCompatActivity {
     Button btn_rms;
     StepMonitor moving_check;
     Intent step_count;
+    private RecyclerView.Adapter adapter;
+    private ArrayList<StatItem> items = new ArrayList<>();
+
     private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            int temp_total_steps = 0;
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
                 steps = intent.getIntExtra("steps", 0);
-                int temp_total_steps = 0;
+                temp_total_steps = 0;
                 temp_total_steps += steps/2;
                 Log.d("test",moving_check.gaptime()+"");
                     total_steps += temp_total_steps;
@@ -57,12 +65,21 @@ public class MainActivity extends AppCompatActivity {
             else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
                 long gap = intent.getLongExtra("gap", 0);
                 boolean stay = intent.getBooleanExtra("stay", true);
-
+                long nowTime = intent.getLongExtra("endTime", 0);
+                long prevTime = intent.getLongExtra("startTime", 0);
                 if(gap> 0) {
-                    if(stay)
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                    String endTime = sdf.format(nowTime);
+                    String startTime = sdf.format(prevTime);
+                    if(stay) {
                         textFileManager.save(gap + "초 체류\n");
-                    else
+                        items.add(new StatItem(startTime, endTime, gap + "초 정지", "temp", stay));
+                    }
+                    else {
                         textFileManager.save(gap + "초 이동\n");
+                        items.add(new StatItem(startTime, endTime, gap + "초 이동", temp_total_steps+"걸음", stay));
+                    }
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -72,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setRecyclerView();
+
         step_count = new Intent(this , StepCount.class);
         requestRuntimePermission();
         moving_check =  new StepMonitor(getApplicationContext());
@@ -207,5 +227,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
          unregisterReceiver(receiver_text);
+    }
+
+    private void setRecyclerView() {
+        RecyclerView recyclerView;
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        adapter = new RecyclerAdapter(items);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 }

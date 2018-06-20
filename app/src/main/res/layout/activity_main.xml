@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#dc1d1d26"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
@@ -22,7 +23,7 @@
         android:text="Name" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/button_rms"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="rms값입력" />
@@ -38,6 +39,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="steps:0" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/tv_content"
