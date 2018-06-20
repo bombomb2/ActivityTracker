@@ -98,6 +98,7 @@ public class IndoorService extends Service {
         //location[0] = new Location_in("401호", "18:80:90:c6:7b:22", -51, "18:80:90:c6:7b:21", -50, "18:80:90:c6:7b:2d", -50);
         location[0] = new Location_in("401호", "64:e5:99:8e:4c:58", -49, "00:40:5a:e4:b2:fb", -52, "64:e5:99:8e:4c:58", -52); //실은 방
         location[1] = new Location_in("다산홀", " 20:3a:07:9e:a6:c0", -66, "20:3a:07:9e:a6:c5", -62, "a4:18:75:58:77:d1", -58);
+        startTimerTask();
     }
 
     @Override
@@ -106,7 +107,7 @@ public class IndoorService extends Service {
         // flags: service start 요청에 대한 부가 정보. 0, START_FLAG_REDELIVERY, START_FLAG_RETRY
         // startId: start 요청을 나타내는 unique integer id
         // 주기적으로 wifi scan 수행하기 위한 timer 가동
-        startTimerTask();
+
 
         return super.onStartCommand(intent, flags, startId);
     }

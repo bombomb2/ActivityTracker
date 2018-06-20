@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     final int MY_PERMISSIONS_REQUEST = 1;
     TextView step;
     TextFileManager textFileManager;
-    int total_steps;
+    int total_steps = 0;
     private int steps;
     StepMonitor moving_check;
     Intent step_count;
@@ -51,26 +51,21 @@ public class MainActivity extends AppCompatActivity {
             }
 
             else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
-                boolean isDelete = false;
                 long gap = intent.getLongExtra("gap", 0);
                 boolean stay = intent.getBooleanExtra("stay", true);
                 long nowTime = intent.getLongExtra("endTime", 0);
                 long prevTime = intent.getLongExtra("startTime", 0);
                 if(gap> 0) {
-                    if(location.equals("")){
-                        startService(new Intent(getApplicationContext(), IndoorService.class));
-                    }
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                     String endTime = sdf.format(nowTime);
                     String startTime = sdf.format(prevTime);
                     if(stay) {
-                        if(gap>=5) {
+                        if(gap>=1) {
                             textFileManager.save(startTime+"-"+endTime+": "+location+ ", "+gap + "분 정지\n");
                             items.add(new StatItem(startTime, endTime, gap, location, stay));
                         }
                     }
                     else {
-                        location = "";
                         if(gap>=1) {
                             textFileManager.save(startTime+"-"+endTime+": "+now_steps+ "걸음, "+gap + "분 이동\n");
                             items.add(new StatItem(startTime, endTime, gap, now_steps + "걸음", stay));
