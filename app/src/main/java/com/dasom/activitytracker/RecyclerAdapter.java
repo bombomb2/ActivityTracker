@@ -35,6 +35,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         holder.tv_location.setText(mItems.get(position).getLocation());
         if (mItems.get(position).isStay()) { //체류
             holder.img_circle.setColorFilter(Color.parseColor("#ffc0cb"));
+            holder.view.setBackgroundColor(Color.parseColor("#80ffffff"));
 
         }
         else {

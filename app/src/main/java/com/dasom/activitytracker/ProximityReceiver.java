@@ -22,6 +22,9 @@ public class ProximityReceiver extends BroadcastReceiver {
             Toast.makeText(context, name + "에 접근중입니다..", Toast.LENGTH_LONG).show();
             textFileManager.save(getTime() + name+ "에 접근했습니다.\n");
             context.sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
+            Intent intent2 = new Intent("com.dasom.activitytracker.location");
+            intent2.putExtra("location", name);
+            context.sendBroadcast(intent2);
         }
         else {
             Toast.makeText(context, name + "에서 벗어납니다..", Toast.LENGTH_LONG).show();

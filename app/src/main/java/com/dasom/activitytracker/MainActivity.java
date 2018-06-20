@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             int temp_total_steps = 0;
+            String location = "";
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
                 steps = intent.getIntExtra("steps", 0);
                 temp_total_steps = 0;
@@ -91,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setRecyclerView();
-
         step_count = new Intent(this , StepCount.class);
         requestRuntimePermission();
         moving_check =  new StepMonitor(getApplicationContext());
@@ -124,11 +124,13 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
         intentFilter.addAction("com.dasom.activitytracker.time");
+        intentFilter.addAction("com.dasom.activitytracker.location");
         registerReceiver(MyStepReceiver, intentFilter);
         textFileManager = new TextFileManager();
         Intent hs = new Intent(this,HSMonitor.class);
         startService(hs);
         startService(new Intent(this, TimeMonitor.class));
+
     }
 
     private void requestRuntimePermission() {
@@ -231,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setRecyclerView() {
         RecyclerView recyclerView;
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+        recyclerView= (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         adapter = new RecyclerAdapter(items);
         recyclerView.setAdapter(adapter);

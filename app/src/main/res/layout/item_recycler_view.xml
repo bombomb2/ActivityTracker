@@ -64,7 +64,7 @@
             android:layout_width="2dp"
             android:layout_height="match_parent"
             android:layout_marginStart="7dp"
-            android:background="@drawable/timeline_line"
+            app:srcCompat="@drawable/timeline_line"
             app:layout_constraintStart_toEndOf="@+id/li1" />
 
         <ImageView
@@ -72,7 +72,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:layout_marginTop="33dp"
-            android:src="@drawable/timeline_oval"
+            app:srcCompat="@drawable/timeline_oval"
             android:visibility="visible" />
 
     </FrameLayout>
