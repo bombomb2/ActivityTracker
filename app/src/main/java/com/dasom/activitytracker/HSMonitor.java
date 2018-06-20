@@ -88,10 +88,14 @@ public class HSMonitor extends Service {
                     public void onFinish() {
                         Log.d(LOGTAG, "1-second accel data collected!!");
                         // stop the accel data update
+                        Intent step = new Intent("uncheck_step");
+                        step.putExtra("uncheck_step",accelMonitor.getCount());
+                        sendBroadcast(step);
                         accelMonitor.onStop();
                         boolean moving = accelMonitor.isMoving();
                         // 움직임 여부에 따라 GPS location update 요청 처리
                         if(moving) {
+                            startService(new Intent(getApplicationContext(),StepCount.class));
                             startMoveTime = getTime();
                             Log.d("시간", "이동시작시간: "+ startMoveTime);
 
@@ -111,6 +115,7 @@ public class HSMonitor extends Service {
 
                          stopProximity();
                         } else {
+                            stopService(new Intent(getApplicationContext(),StepCount.class));
                             endMoveTime = getTime();
                             Log.d("시간", "이동정지시간: "+ endMoveTime);
 
@@ -379,10 +384,6 @@ public class HSMonitor extends Service {
     }
 
     private void startProximity() {
-        Intent intent = new Intent(getApplicationContext(),StepCount.class);
-        intent.putExtra("rms",accelMonitor.getRms());
-        startService(intent);
-
         try {
             locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
         } catch (SecurityException e) {
@@ -420,6 +421,5 @@ public class HSMonitor extends Service {
         catch (IllegalArgumentException e){
             e.printStackTrace();
         }
-        stopService(new Intent(getApplicationContext(), IndoorService.class));
     }
 }

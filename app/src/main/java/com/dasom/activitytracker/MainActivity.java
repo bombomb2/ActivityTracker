@@ -36,27 +36,27 @@ public class MainActivity extends AppCompatActivity {
     Intent step_count;
     private RecyclerView.Adapter adapter;
     private ArrayList<StatItem> items = new ArrayList<>();
-
+    int temp_steps;
+    int now_steps;
     private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int temp_total_steps = 0;
-            String location = "";
+
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
                 steps = intent.getIntExtra("steps", 0);
-                temp_total_steps = 0;
-                temp_total_steps += steps/2;
-                Log.d("test",moving_check.gaptime()+"");
-                    total_steps += temp_total_steps;
-                    total_steps += steps;
+                temp_steps = intent.getIntExtra("steps2",0);
+                now_steps += steps ;
 
-
-               step.setText("steps: " + total_steps);
-                //Log.d("test_sample", total_steps+"");
+            }
+            else if(intent.getAction().equals("uncheck_step"))
+            {
+                temp_steps = intent.getIntExtra("uncheck_step",0)/2;
+                now_steps += temp_steps;
             }
             else if(intent.getAction().equals(BROADCAST_ACTION_ACTIVITY)) {
                 boolean moving = intent.getBooleanExtra("moving", false);
                 if(moving) {
+                    //temp_total_steps = moving_check.getCount();
                     movingText.setText("Moving");
                 } else {
                     movingText.setText("NOT Moving");
@@ -78,7 +78,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                     else {
                         textFileManager.save(gap + "초 이동\n");
-                        items.add(new StatItem(startTime, endTime, gap + "초 이동", temp_total_steps+"걸음", stay));
+
+                        items.add(new StatItem(startTime, endTime, gap + "초 이동", now_steps+"걸음", stay));
+                        total_steps += now_steps;
+                        step.setText("steps: " + total_steps);
+                        moving_check.setCount(0);
+                        now_steps = 0;
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setRecyclerView();
+
         step_count = new Intent(this , StepCount.class);
         requestRuntimePermission();
         moving_check =  new StepMonitor(getApplicationContext());
@@ -124,13 +130,12 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         intentFilter.addAction("kr.ac.koreatech.msp.stepmonitor");
         intentFilter.addAction("com.dasom.activitytracker.time");
-        intentFilter.addAction("com.dasom.activitytracker.location");
+        intentFilter.addAction("uncheck_step");
         registerReceiver(MyStepReceiver, intentFilter);
         textFileManager = new TextFileManager();
         Intent hs = new Intent(this,HSMonitor.class);
         startService(hs);
         startService(new Intent(this, TimeMonitor.class));
-
     }
 
     private void requestRuntimePermission() {
@@ -233,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setRecyclerView() {
         RecyclerView recyclerView;
-        recyclerView= (RecyclerView)findViewById(R.id.recyclerView);
+        recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         adapter = new RecyclerAdapter(items);
         recyclerView.setAdapter(adapter);
