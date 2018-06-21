@@ -8,11 +8,7 @@ import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
-import android.os.Vibrator;
-import android.util.Log;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +23,6 @@ public class IndoorService extends Service {
     Timer timer = new Timer();
     TimerTask timerTask = null;
     Location_in[] location;
-    Vibrator vib;
 
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -45,7 +40,7 @@ public class IndoorService extends Service {
             location[i].setProximate(false);
 
 
-        // 등록된 top1 AP가 스캔 결과에 있으며, 그 RSSI가 top1 rssi 값보다 10이하로 작을 때
+        // 등록된 top AP 3개중 하나라도 스캔 결과에 있으며, 그 RSSI가 +-6이하로 작을 때
         // 등록된 장소 근처에 있는 것으로 판단
         for (int j = 0; j < count; j++) {
             for (int i = 1; i < scanList.size(); i++) {
@@ -61,15 +56,14 @@ public class IndoorService extends Service {
         for (int i = 0; i < count; i++) {
             if (location[i].isProximate()) { // 등록한 위치에 있는경우
                 isProximate = true;
-                sendBroadcast(new Intent("com.dasom.activitytracker.WRITE_FILE")); // 파일생성을 알리기 위한 브로드캐스트 생성
 
-                Intent intent2 = new Intent("com.dasom.activitytracker.location");
+                Intent intent2 = new Intent("com.dasom.activitytracker.location"); //위치 파악을 액티비티에 알리기 위해 브로드 캐스트 발생
                 intent2.putExtra("location", location[i].getlocationName());
                 sendBroadcast(intent2);
             }
         }
         if(!isProximate) { // 등록한 위치가 아닌경우
-            Intent intent2 = new Intent("com.dasom.activitytracker.location");
+            Intent intent2 = new Intent("com.dasom.activitytracker.location"); //위치 파악을 액티비티에 알리기 위해 브로드 캐스트 발생
             intent2.putExtra("location", "실내");
             sendBroadcast(intent2);
         }
@@ -82,13 +76,11 @@ public class IndoorService extends Service {
 
     @Override
     public void onCreate() {
-        vib = (Vibrator)getSystemService(VIBRATOR_SERVICE);
         wifiManager = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         location = new Location_in[2];
 
         IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         registerReceiver(mReceiver, filter);
-        Log.d("123","123");
 
         //각 위치의 ap정보를 객체로 생성
         location[0] = new Location_in("401호", "18:80:90:c6:7b:22", -51, "18:80:90:c6:7b:21", -50, "18:80:90:c6:7b:2d", -50);
@@ -135,13 +127,5 @@ public class IndoorService extends Service {
             timerTask.cancel();
             timerTask = null;
         }
-    }
-
-    private String getTime(){ //현재 날짜와 시간을 반환해줌
-        Date date = new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        String time = sdf.format(date);
-
-        return time;
     }
 }

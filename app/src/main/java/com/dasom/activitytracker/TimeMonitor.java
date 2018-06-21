@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,24 +21,22 @@ public class TimeMonitor extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent.getAction().equals("kr.ac.koreatech.msp.hslocationtracking")) {
+            if (intent.getAction().equals("kr.ac.koreatech.msp.hslocationtracking")) { // 사용자의 움직임 정보 수신
                 now_moving = intent.getBooleanExtra("moving", false);
                 long time = intent.getLongExtra("time", 0);
 
                 if(!first) {
-                    if (now_moving ^ prev_moving) {
+                    if (now_moving ^ prev_moving) { //사용자가 정지했다가 이동 혹은 이동하였다가 정지 상태
                         now_time = time;
-                        long gap = (now_time - prev_time) / 1000;
-                        Intent intent2 = new Intent("com.dasom.activitytracker.time");
+                        long gap = (now_time - prev_time) / 1000; // 두 시간 차이를 구함
+                        Intent intent2 = new Intent("com.dasom.activitytracker.time"); //메인 액티비티에 출력하기 위한 브로드캐스트 발생
                         intent2.putExtra("gap", gap);
                         if(now_moving) {
-                            Log.d("지금", gap+"분 체류");
                             intent2.putExtra("stay", true);
                             intent2.putExtra("startTime", prev_time);
                             intent2.putExtra("endTime", now_time);
                         }
                         else {
-                            Log.d("지금", gap+"분 이동");
                             intent2.putExtra("stay", false);
                             intent2.putExtra("startTime", prev_time);
                             intent2.putExtra("endTime", now_time);
@@ -53,8 +50,6 @@ public class TimeMonitor extends Service {
             }
         }
     };
-
-
     public TimeMonitor() {
     }
 
@@ -71,7 +66,7 @@ public class TimeMonitor extends Service {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("kr.ac.koreatech.msp.hslocationtracking");
         registerReceiver(recieve_move, intentFilter);
-        prev_time = getTime();
+        prev_time = getTime(); //처음에는 출발시간을 현재 시간으로 설정
     }
 
     @Override

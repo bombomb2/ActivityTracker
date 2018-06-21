@@ -12,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -48,11 +47,10 @@ public class MainActivity extends AppCompatActivity {
             {
                 //움직임 판단동안 측정된 걸음수를 현재 걸음수에 저장
                 temp_steps = intent.getIntExtra("uncheck_step",0)/2;
-                Log.d("check_step","step1 "+temp_steps);
                 now_steps += temp_steps;
             }
 
-            else if(intent.getAction().equals("com.dasom.activitytracker.time")) {
+            else if(intent.getAction().equals("com.dasom.activitytracker.time")) { // TimeMonitor로부터 시간및 이동 정보 수신
                 long gap = intent.getLongExtra("gap", 0);
                 boolean stay = intent.getBooleanExtra("stay", true);
                 long nowTime = intent.getLongExtra("endTime", 0);
@@ -61,29 +59,28 @@ public class MainActivity extends AppCompatActivity {
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                     String endTime = sdf.format(nowTime);
                     String startTime = sdf.format(prevTime);
-                    if(stay) {
-                        if(gap>=1) {
-                            textFileManager.save(startTime+"-"+endTime+": "+location+ ", "+gap + "분 정지\n");
-                            items.add(new StatItem(startTime, endTime, gap, location, stay));
+                    if(stay) { // 현재 정지 상태
+                        if(gap>=5) {
+                            textFileManager.save(startTime+"-"+endTime+": "+location+ ", "+gap + "분 정지\n"); //로그 저장
+                            items.add(new StatItem(startTime, endTime, gap, location, stay)); // 목록에 추가
                         }
                     }
-                    else {
+                    else { //현재 이동 상태
                         if(gap>=1) {
-                            textFileManager.save(startTime+"-"+endTime+": "+now_steps+ "걸음, "+gap + "분 이동\n");
-                            items.add(new StatItem(startTime, endTime, gap, now_steps + "걸음", stay));
-                            Log.d("check_step", "step2 " + now_steps);
-                            total_steps += now_steps;
+                            textFileManager.save(startTime+"-"+endTime+": "+now_steps+ "걸음, "+gap + "분 이동\n"); //로그 저장
+                            items.add(new StatItem(startTime, endTime, gap, now_steps + "걸음", stay)); //목록 추가
+                            total_steps += now_steps; //총 걸음수 계산
                             step.setText("Steps: " + total_steps);
                             moving_check.setCount(0);
                             now_steps = 0;
                         }
                     }
-                    adapter.notifyDataSetChanged();
-                    recyclerView.scrollToPosition(adapter.getItemCount()-1);
+                    adapter.notifyDataSetChanged(); //목록 추가 알림
+                    recyclerView.scrollToPosition(adapter.getItemCount()-1); //목록이 화면 아래로 내려가면 자동으로 스크롤
                 }
             }
-            else if(intent.getAction().equals("com.dasom.activitytracker.location")) {
-                location = intent.getStringExtra("location");
+            else if(intent.getAction().equals("com.dasom.activitytracker.location")) { //위치 정보가 수신되면
+                location = intent.getStringExtra("location"); //위치 정보 저장
             }
         }
     };
@@ -176,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setRecyclerView() {
+    private void setRecyclerView() { //RecyclerView 초기 구성
         recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         adapter = new RecyclerAdapter(items);

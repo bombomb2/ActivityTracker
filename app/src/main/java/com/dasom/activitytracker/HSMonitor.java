@@ -18,12 +18,10 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public class HSMonitor extends Service {
     private static final String LOGTAG = "HS_Location_Tracking";
@@ -55,7 +53,6 @@ public class HSMonitor extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals("kr.ac.koreatech.msp.hsalarm")) {
-                Log.d(LOGTAG, "Alarm fired!!!!");
                 //-----------------
                 // Alarm receiver에서는 장시간에 걸친 연산을 수행하지 않도록 한다
                 // Alarm을 발생할 때 안드로이드 시스템에서 wakelock을 잡기 때문에 CPU를 사용할 수 있지만
@@ -77,7 +74,6 @@ public class HSMonitor extends Service {
 
                     @Override
                     public void onFinish() {
-                        Log.d(LOGTAG, "1-second accel data collected!!");
                         //duty cycling주기가 종료되면 측정된 걸음수 값을 메인으로 전달
                         Intent step = new Intent("uncheck_step");
                         step.putExtra("uncheck_step",accelMonitor.getCount());
@@ -89,9 +85,8 @@ public class HSMonitor extends Service {
                             //움직임이 판단되면 걸음 수 서비스를 실행
                             startService(new Intent(getApplicationContext(),StepCount.class));
                             startMoveTime = getTime();
-                            Log.d("시간", "이동시작시간: "+ startMoveTime);
 
-                                    // 화면에 정보 표시를 위해 activity의 broadcast receiver가 받을 수 있도록 broadcast 전송
+                                    // 시간 정보 출력을 위해 움직임 상태와 시간 브로드캐스트 전송
                                     Intent intent = new Intent(BROADCAST_ACTION_ACTIVITY);
                                     intent.putExtra("moving", moving);
                                     intent.putExtra("time", startMoveTime);
@@ -103,15 +98,15 @@ public class HSMonitor extends Service {
                         } else {
                             stopService(new Intent(getApplicationContext(),StepCount.class));
                             endMoveTime = getTime();
-                            Log.d("시간", "이동정지시간: "+ endMoveTime);
 
+                                    // 시간 정보 출력을 위해 움직임 상태와 시간 브로드캐스트 전송
                                     Intent intent = new Intent(BROADCAST_ACTION_ACTIVITY);
                                     intent.putExtra("moving", moving);
                                     intent.putExtra("time" , endMoveTime);
                                     // broadcast 전송
                                     sendBroadcast(intent);
 
-                            startProximity();
+                            startProximity(); //Heirarchical 기법을 위해 멈출 때만 위치 측정 시작
                         }
                         // 움직임 여부에 따라 다음 alarm 설정
                         setNextAlarm(moving);
@@ -128,28 +123,18 @@ public class HSMonitor extends Service {
         }
     };
 
-    public String getCurrentTime() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.KOREA);
-        Date currentTime = new Date();
-        String dTime = formatter.format(currentTime);
-        return dTime;
-    }
-
     private void setNextAlarm(boolean moving) {
 
         // 움직임이면 5초 period로 등록
         // 움직임이 아니면 5초 증가, max 30초로 제한
         if(moving) {
-            Log.d(LOGTAG, "MOVING!!");
             period = periodForMoving;
         } else {
-            Log.d(LOGTAG, "NOT MOVING!!");
             period = period + periodIncrement;
             if(period >= periodMax) {
                 period = periodMax;
             }
         }
-        Log.d(LOGTAG, "Next alarm: " + period);
 
         // 다음 alarm 등록
         Intent in = new Intent("kr.ac.koreatech.msp.hsalarm");
@@ -165,9 +150,6 @@ public class HSMonitor extends Service {
 
     @Override
     public void onCreate() {
-
-        Log.d(LOGTAG, "onCreate");
-
         // Alarm 발생 시 전송되는 broadcast를 수신할 receiver 등록
         IntentFilter intentFilter = new IntentFilter("kr.ac.koreatech.msp.hsalarm");
         registerReceiver(AlarmReceiver, intentFilter);
@@ -185,9 +167,6 @@ public class HSMonitor extends Service {
         // intent: startService() 호출 시 넘기는 intent 객체
         // flags: service start 요청에 대한 부가 정보. 0, START_FLAG_REDELIVERY, START_FLAG_RETRY
         // startId: start 요청을 나타내는 unique integer id
-
-        Log.d(LOGTAG, "onStartCommand");
-
         // Alarm이 발생할 시간이 되었을 때, 안드로이드 시스템에 전송을 요청할 broadcast를 지정
         Intent in = new Intent("kr.ac.koreatech.msp.hsalarm");
         pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, in, 0);
@@ -220,18 +199,16 @@ public class HSMonitor extends Service {
         }
     }
 
-    private class gpsListener implements LocationListener {
+    private class gpsListener implements LocationListener { // LocationListener 구현
         @Override
         public void onLocationChanged(Location location) {
-            Location loc_now = new Location("현재위치");
+            Location loc_now = new Location("현재위치"); // 현재 위치 정보를 저장
             loc_now.setLatitude(location.getLatitude());
             loc_now.setLongitude(location.getLongitude());
             loc_now.setAccuracy(location.getAccuracy());
-            Log.d("gps", "위도: "+ loc_now.getLatitude());
-            Log.d("gps", "경도: "+ loc_now.getLongitude());
-            Log.d("gps", "정확도: "+ loc_now.getAccuracy());
 
-                if (loc_now.getAccuracy() <= 6 && loc_now.getAccuracy() >= 2) {
+                 // GPS Accuracy를 이용하여 실내, 실외 판단
+                if (loc_now.getAccuracy() <= 6 && loc_now.getAccuracy() >= 2) { // 실외일 때
                     Location loc_field = new Location("운동장");
                     loc_field.setLatitude(36.762581);
                     loc_field.setLongitude(127.284527);
@@ -243,22 +220,22 @@ public class HSMonitor extends Service {
                     float distance_field = loc_now.distanceTo(loc_field);
                     float distance_head = loc_now.distanceTo(loc_head);
 
-                    if (distance_field <= 80) {
+                    if (distance_field <= 80) { // 운동장과의 거리가 반경 80m 이내
                         Intent intent2 = new Intent("com.dasom.activitytracker.location");
                         intent2.putExtra("location", "운동장");
-                        sendBroadcast(intent2);
-                    } else if (distance_head <= 50) {
+                        sendBroadcast(intent2); //브로드 캐스트 발생
+                    } else if (distance_head <= 50) {// 대학본부와의 거리가 반경 80m 이내
                         Intent intent2 = new Intent("com.dasom.activitytracker.location");
                         intent2.putExtra("location", "대학본부 앞");
                         sendBroadcast(intent2);
-                    } else {
+                    } else { // 그 외에는 실외로 판단
                         Intent intent2 = new Intent("com.dasom.activitytracker.location");
                         intent2.putExtra("location", "실외");
                         sendBroadcast(intent2);
                     }
                 }
-                else {
-                    startService(new Intent(getApplicationContext(), IndoorService.class));
+                else { // 실내일 경우
+                    startService(new Intent(getApplicationContext(), IndoorService.class)); //IndoorService 실행
                 }
 
             }
@@ -293,7 +270,7 @@ public class HSMonitor extends Service {
         return date.getTime();
     }
 
-    private void startProximity() {
+    private void startProximity() { // GPS 수신 시작
         try {
             locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mgpsListener);
         } catch (SecurityException e) {
@@ -304,7 +281,7 @@ public class HSMonitor extends Service {
             wifiManager.setWifiEnabled(true);
     }
 
-    private void stopProximity() {
+    private void stopProximity() { //GPS 수신 종료
 
         try {
             locManager.removeUpdates(mgpsListener);

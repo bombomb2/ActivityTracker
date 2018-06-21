@@ -1,6 +1,6 @@
 package com.dasom.activitytracker;
 
-public class StatItem {
+public class StatItem { // RecyclerView에 출력하기 위한 Item 객체
     private String startTime;
     private String endTime;
     private long stats;

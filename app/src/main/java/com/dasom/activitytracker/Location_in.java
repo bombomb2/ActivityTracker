@@ -1,5 +1,5 @@
 package com.dasom.activitytracker;
-//
+// 실내 위치정보를 편하게 하기 위한 객체
 public class Location_in {
     private String locationName;
     private String top1APId;

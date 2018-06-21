@@ -33,15 +33,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         holder.tv_endTime.setText(mItems.get(position).getEndTime());
 
         holder.tv_location.setText(mItems.get(position).getLocation());
-        if (mItems.get(position).isStay()) { //체류
-            holder.tv_stats.setText(mItems.get(position).getStats()+"분 정지");
-            holder.img_circle.setColorFilter(Color.parseColor("#ffc0cb"));
+        if (mItems.get(position).isStay()) { //정지 상태일 때
+            holder.tv_stats.setText(mItems.get(position).getStats()+"분 정지"); //시간상태에 정지 출력
+            holder.img_circle.setColorFilter(Color.parseColor("#ffc0cb")); // 색상 변경
             holder.view.setBackgroundColor(Color.parseColor("#80ffffff"));
 
         }
         else {
-            holder.tv_stats.setText(mItems.get(position).getStats()+"분 이동");
-            holder.img_circle.setColorFilter(Color.parseColor("#FFFCAB53"));
+            holder.tv_stats.setText(mItems.get(position).getStats()+"분 이동"); //시간 상태에 이동 출력
+            holder.img_circle.setColorFilter(Color.parseColor("#FFFCAB53")); //색상 변경
             holder.view.setBackgroundColor(Color.parseColor("#FF50D2C2"));
         }
         }
