@@ -23,27 +23,30 @@ public class MainActivity extends AppCompatActivity {
     final int MY_PERMISSIONS_REQUEST = 1;
     TextView step;
     TextFileManager textFileManager;
-    int total_steps = 0;
+    int total_steps = 0; //총 걸음수를 저장하는 변수
     private int steps;
     StepMonitor moving_check;
     Intent step_count;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private ArrayList<StatItem> items = new ArrayList<>();
-    int temp_steps;
-    int now_steps;
+    int temp_steps;//움직임이 없는 동안의 걸음수를 저장하는 변수
+    int now_steps;//현재 걸음수를 저장하는 변수
     private BroadcastReceiver MyStepReceiver = new BroadcastReceiver() {
         String location = "";
         @Override
         public void onReceive(Context context, Intent intent) {
 
             if(intent.getAction().equals("kr.ac.koreatech.msp.stepmonitor")) {
-                steps = intent.getIntExtra("steps", 0)/2;
+                //걸음 수를 판단 후  넘어오는 걸음 수에 대해 정확도를 위해 나누기 2를
+                //하여 걸음 수의 정확도를 향상
+                steps = intent.getIntExtra("steps", 0)/2;//
                 now_steps += steps ;
 
             }
             else if(intent.getAction().equals("uncheck_step"))
             {
+                //움직임 판단동안 측정된 걸음수를 현재 걸음수에 저장
                 temp_steps = intent.getIntExtra("uncheck_step",0)/2;
                 Log.d("check_step","step1 "+temp_steps);
                 now_steps += temp_steps;

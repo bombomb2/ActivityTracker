@@ -26,15 +26,15 @@ public class StepMonitor implements SensorEventListener {
     private boolean isMoving;
 
 
-    private static double step_THRESHOLD = 1.6
-            ;
+    private static double step_THRESHOLD = 1.6;
+
    public void setRms(double rms)
    {
        step_THRESHOLD = rms;
-   }
+   }//테스트때 움직임 기준치 설정을 위한 함수
    public double getRms(){return step_THRESHOLD;}
-   public void setCount(int i){count = i;}
-   public int getCount(){return count/2;}
+   public void setCount(int i){count = i;} //걸음 수 값 초기화를 위한 함수
+   public int getCount(){return count/2;} //걸음 수 값 반환을 위한 함수
     public StepMonitor(Context context) {
         this.context = context;
 
@@ -57,6 +57,7 @@ public class StepMonitor implements SensorEventListener {
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(this);
         }
+        //duty cycling동안 측정된 rms값을 계산하여 움직임 판단
         if(arr_rms.size()>3) {
             Descending descending = new Descending();
             Collections.sort(arr_rms, descending);
@@ -96,7 +97,7 @@ public class StepMonitor implements SensorEventListener {
         z =values[2];
         double rms = Math.sqrt(x * x + y * y + z * z);
         arr_rms.add(rms);
-
+        //움직임 판단 도중 움직이는 걸음수에 대한 값을 저장하고 나중에 메인으로 값 전달
         if(rms > step_THRESHOLD)
             count++;
     }
@@ -107,7 +108,7 @@ public class StepMonitor implements SensorEventListener {
     }
 
 }
-
+//rms배열의 정렬을 위한 클래스 선언
 class Descending implements Comparator<Double> {
     @Override
     public int compare(Double o1, Double o2)

@@ -78,7 +78,7 @@ public class HSMonitor extends Service {
                     @Override
                     public void onFinish() {
                         Log.d(LOGTAG, "1-second accel data collected!!");
-
+                        //duty cycling주기가 종료되면 측정된 걸음수 값을 메인으로 전달
                         Intent step = new Intent("uncheck_step");
                         step.putExtra("uncheck_step",accelMonitor.getCount());
                         sendBroadcast(step);
@@ -86,6 +86,7 @@ public class HSMonitor extends Service {
                         boolean moving = accelMonitor.isMoving();
                         // 움직임 여부에 따라 GPS location update 요청 처리
                         if(moving) {
+                            //움직임이 판단되면 걸음 수 서비스를 실행
                             startService(new Intent(getApplicationContext(),StepCount.class));
                             startMoveTime = getTime();
                             Log.d("시간", "이동시작시간: "+ startMoveTime);
