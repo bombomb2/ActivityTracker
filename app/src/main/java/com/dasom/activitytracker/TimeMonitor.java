@@ -28,7 +28,7 @@ public class TimeMonitor extends Service {
                 if(!first) {
                     if (now_moving ^ prev_moving) { //사용자가 정지했다가 이동 혹은 이동하였다가 정지 상태
                         now_time = time;
-                        long gap = (now_time - prev_time) / 1000; // 두 시간 차이를 구함
+                        long gap = (now_time - prev_time) / 1000 / 60; // 두 시간 차이를 구함
                         Intent intent2 = new Intent("com.dasom.activitytracker.time"); //메인 액티비티에 출력하기 위한 브로드캐스트 발생
                         intent2.putExtra("gap", gap);
                         if(now_moving) {

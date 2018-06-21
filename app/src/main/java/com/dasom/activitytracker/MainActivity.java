@@ -60,13 +60,13 @@ public class MainActivity extends AppCompatActivity {
                     String endTime = sdf.format(nowTime);
                     String startTime = sdf.format(prevTime);
                     if(stay) { // 현재 정지 상태
-                        if(gap>=5) {
+                        if(gap>=5) { //5분 이상 정지
                             textFileManager.save(startTime+"-"+endTime+": "+location+ ", "+gap + "분 정지\n"); //로그 저장
                             items.add(new StatItem(startTime, endTime, gap, location, stay)); // 목록에 추가
                         }
                     }
                     else { //현재 이동 상태
-                        if(gap>=1) {
+                        if(gap>=1) { //1분 이상 이동
                             textFileManager.save(startTime+"-"+endTime+": "+now_steps+ "걸음, "+gap + "분 이동\n"); //로그 저장
                             items.add(new StatItem(startTime, endTime, gap, now_steps + "걸음", stay)); //목록 추가
                             total_steps += now_steps; //총 걸음수 계산
@@ -181,5 +181,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        unregisterReceiver(MyStepReceiver);
+    }
 }
